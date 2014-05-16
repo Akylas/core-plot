@@ -62,6 +62,10 @@
     CGContextSetFillColorWithColor(context, self.fillColor.cgColor);
     CGContextFillPath(context);
     CGContextRestoreGState(context);
+    if ( !CGContextIsPathEmpty(context) ) {
+        CGRect bounds = CGContextGetPathBoundingBox(context);
+        [self fillRect:bounds inContext:context];
+    }
 }
 
 #pragma mark -
@@ -70,6 +74,17 @@
 -(BOOL)isOpaque
 {
     return self.fillColor.opaque;
+}
+
+/** @brief Draws the color into the given graphics context clipped to the current drawing path.
+ *  @param context The graphics context to draw into.
+ **/
+-(void)fillPathWithinRect:(CGRect)rect inContext:(CGContextRef)context
+{
+    CGContextSaveGState(context);
+    CGContextSetFillColorWithColor(context, self.fillColor.cgColor);
+    CGContextFillPath(context);
+    CGContextRestoreGState(context);
 }
 
 #pragma mark -

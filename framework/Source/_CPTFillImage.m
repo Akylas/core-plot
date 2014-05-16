@@ -64,6 +64,11 @@
     CGContextRestoreGState(context);
 }
 
+-(void)fillPathWithinRect:(CGRect)rect inContext:(CGContextRef)context
+{
+    [self fillPathInContext:context];
+}
+
 #pragma mark -
 #pragma mark Opacity
 

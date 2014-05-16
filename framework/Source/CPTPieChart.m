@@ -28,6 +28,7 @@
 
 NSString *const CPTPieChartBindingPieSliceWidthValues   = @"sliceWidths";        ///< Pie slice widths.
 NSString *const CPTPieChartBindingPieSliceFills         = @"sliceFills";         ///< Pie slice interior fills.
+NSString *const CPTPieChartBindingPieSliceBorders        = @"sliceBorders";         ///< Pie slice borders.
 NSString *const CPTPieChartBindingPieSliceRadialOffsets = @"sliceRadialOffsets"; ///< Pie slice radial offsets.
 
 /// @cond
@@ -45,6 +46,7 @@ NSString *const CPTPieChartBindingPieSliceRadialOffsets = @"sliceRadialOffsets";
 
 -(void)addSliceToPath:(CGMutablePathRef)slicePath centerPoint:(CGPoint)center startingAngle:(CGFloat)startingAngle finishingAngle:(CGFloat)finishingAngle;
 -(CPTFill *)sliceFillForIndex:(NSUInteger)idx;
+-(CPTLineStyle *)sliceBorderForIndex:(NSUInteger)idx;
 
 @end
 
@@ -311,6 +313,9 @@ static const CGFloat colorLookupTable[10][3] =
 
     // Slice fills
     [self reloadSliceFillsInIndexRange:indexRange];
+    
+    // Slice borders
+    [self reloadSliceBordersInIndexRange:indexRange];
 
     // Radial offsets
     [self reloadRadialOffsetsInIndexRange:indexRange];
@@ -506,6 +511,54 @@ static const CGFloat colorLookupTable[10][3] =
 }
 
 /**
+ *  @brief Reload all slice fills from the data source immediately.
+ **/
+-(void)reloadSliceBorders
+{
+    [self reloadSliceBordersInIndexRange:NSMakeRange(0, self.cachedDataCount)];
+}
+
+/** @brief Reload slice fills in the given index range from the data source immediately.
+ *  @param indexRange The index range to load.
+ **/
+-(void)reloadSliceBordersInIndexRange:(NSRange)indexRange
+{
+    
+    id<CPTPieChartDataSource> theDataSource = (id<CPTPieChartDataSource>)self.dataSource;
+    
+    BOOL needsLegendUpdate = NO;
+    
+    if ( [theDataSource respondsToSelector:@selector(sliceBordersForPieChart:recordIndexRange:)] ) {
+        needsLegendUpdate = YES;
+        
+        [self cacheArray:[theDataSource sliceBordersForPieChart:self recordIndexRange:indexRange]
+                  forKey:CPTPieChartBindingPieSliceBorders
+           atRecordIndex:indexRange.location];
+    }
+    else if ( [theDataSource respondsToSelector:@selector(sliceBorderForPieChart:recordIndex:)] ) {
+        needsLegendUpdate = YES;
+        
+        id nilObject          = [CPTPlot nilData];
+        NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:indexRange.length];
+        NSUInteger maxIndex   = NSMaxRange(indexRange);
+        
+        for ( NSUInteger idx = indexRange.location; idx < maxIndex; idx++ ) {
+            CPTLineStyle *dataSourceLineStyle = [theDataSource sliceBorderForPieChart:self recordIndex:idx];
+            if ( dataSourceLineStyle ) {
+                [array addObject:dataSourceLineStyle];
+            }
+            else {
+                [array addObject:nilObject];
+            }
+        }
+        
+        [self cacheArray:array forKey:CPTPieChartBindingPieSliceBorders atRecordIndex:indexRange.location];
+    }
+
+    [self setNeedsDisplay];
+}
+
+/**
  *  @brief Reload all slice offsets from the data source immediately.
  **/
 -(void)reloadRadialOffsets
@@ -590,11 +643,11 @@ static const CGFloat colorLookupTable[10][3] =
     }
 
     CGRect bounds;
-    if ( overlay && hasNonZeroOffsets ) {
+//    if ( overlay && hasNonZeroOffsets ) {
         CGFloat radius = self.pieRadius + borderStyle.lineWidth * CPTFloat(0.5);
 
         bounds = CPTRectMake( centerPoint.x - radius, centerPoint.y - radius, radius * CPTFloat(2.0), radius * CPTFloat(2.0) );
-    }
+//    }
 
     [borderStyle setLineStyleInContext:context];
     Class fillClass = [CPTFill class];
@@ -634,14 +687,19 @@ static const CGFloat colorLookupTable[10][3] =
             if ( [currentFill isKindOfClass:fillClass] ) {
                 CGContextBeginPath(context);
                 CGContextAddPath(context, slicePath);
-                [currentFill fillPathInContext:context];
+                [currentFill fillPathWithinRect:bounds inContext:context];
             }
+            
+            CPTLineStyle* lineStyle = [self sliceBorderForIndex:currentIndex];
+            if (lineStyle == nil)
+                lineStyle = borderStyle;
 
             // Draw the border line around the slice
-            if ( borderStyle ) {
+            if ( lineStyle ) {
                 CGContextBeginPath(context);
                 CGContextAddPath(context, slicePath);
-                [borderStyle strokePathInContext:context];
+                [lineStyle setLineStyleInContext:context];
+                [lineStyle strokePathInContext:context];
             }
 
             // draw overlay for exploded pie charts
@@ -735,6 +793,13 @@ static const CGFloat colorLookupTable[10][3] =
     }
 
     return currentFill;
+}
+
+-(CPTLineStyle *)sliceBorderForIndex:(NSUInteger)idx
+{
+    CPTLineStyle *currentBorderStyle = [self cachedValueForKey:CPTPieChartBindingPieSliceBorders recordIndex:idx];
+    
+    return currentBorderStyle;
 }
 
 -(void)drawSwatchForLegend:(CPTLegend *)legend atIndex:(NSUInteger)idx inRect:(CGRect)rect inContext:(CGContextRef)context

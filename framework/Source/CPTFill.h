@@ -32,6 +32,7 @@
 /// @{
 -(void)fillRect:(CGRect)rect inContext:(CGContextRef)context;
 -(void)fillPathInContext:(CGContextRef)context;
+-(void)fillPathWithinRect:(CGRect)rect inContext:(CGContextRef)context;
 /// @}
 
 @end

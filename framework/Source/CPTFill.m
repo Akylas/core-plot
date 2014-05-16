@@ -178,4 +178,13 @@
     // do nothing--subclasses override to do drawing here
 }
 
+
+/** @brief Draws the gradient into the given graphics context clipped to the current drawing path.
+ *  @param context The graphics context to draw into.
+ **/
+-(void)fillPathWithinRect:(CGRect)rect inContext:(CGContextRef)context
+{
+    // do nothing--subclasses override to do drawing here
+}
+
 @end

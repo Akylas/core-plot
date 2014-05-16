@@ -13,6 +13,7 @@
 /// @{
 extern NSString *const CPTPieChartBindingPieSliceWidthValues;
 extern NSString *const CPTPieChartBindingPieSliceFills;
+extern NSString *const CPTPieChartBindingPieSliceBorders;
 extern NSString *const CPTPieChartBindingPieSliceRadialOffsets;
 /// @}
 
@@ -61,6 +62,28 @@ typedef NS_ENUM (NSInteger, CPTPieDirection) {
  *  If the data source returns an NSNull object, no fill is drawn.
  **/
 -(CPTFill *)sliceFillForPieChart:(CPTPieChart *)pieChart recordIndex:(NSUInteger)idx;
+
+/// @}
+
+/// @name Slice Border Style
+/// @{
+
+/** @brief @optional Gets a range of slice borders for the given pie chart.
+ *  @param pieChart The pie chart.
+ *  @param indexRange The range of the data indexes of interest.
+ *  @return The pie slice border style for the slice with the given index.
+ **/
+-(NSArray *)sliceBordersForPieChart:(CPTPieChart *)pieChart recordIndexRange:(NSRange)indexRange;
+
+/** @brief @optional Gets a border style for the given pie chart slice.
+ *  This method will not be called if
+ *  @link CPTPieChartDataSource::sliceBordersForPieChart:recordIndexRange: -sliceBordersForPieChart:recordIndexRange: @endlink
+ *  is also implemented in the datasource.
+ *  @param pieChart The pie chart.
+ *  @param idx The data index of interest.
+ *  @return The pie slice border style for the slice with the given index.
+ **/
+-(CPTLineStyle *)sliceBorderForPieChart:(CPTPieChart *)pieChart recordIndex:(NSUInteger)idx;
 
 /// @}
 

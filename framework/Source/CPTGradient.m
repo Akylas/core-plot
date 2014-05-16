@@ -833,7 +833,7 @@ static void resolveHSV(CGFloat *color1, CGFloat *color2);
 
     CGContextSaveGState(context);
 
-    CGContextClipToRect(context, rect);
+    CGContextClip(context);
 
     switch ( self.gradientType ) {
         case CPTGradientTypeAxial:

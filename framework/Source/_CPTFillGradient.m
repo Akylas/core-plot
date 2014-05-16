@@ -58,6 +58,15 @@
     [self.fillGradient fillPathInContext:context];
 }
 
+/** @brief Draws the gradient into the given graphics context inside the provided rectangle.
+ *  @param rect The rectangle to draw into.
+ *  @param context The graphics context to draw into.
+ **/
+-(void)fillPathWithinRect:(CGRect)rect inContext:(CGContextRef)context
+{
+    [self.fillGradient fillRect:rect inContext:context];
+}
+
 #pragma mark -
 #pragma mark Opacity
 
