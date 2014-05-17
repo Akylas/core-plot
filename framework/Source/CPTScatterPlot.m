@@ -116,6 +116,8 @@ NSString *const CPTScatterPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot sym
  **/
 @synthesize areaBaseValue2;
 
+@synthesize fillSpacePath;
+
 /** @property CGFloat plotSymbolMarginForHitDetection
  *  @brief A margin added to each side of a symbol when determining whether it has been hit.
  *
@@ -206,6 +208,7 @@ NSString *const CPTScatterPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot sym
         pointingDeviceDownIndex         = NSNotFound;
         pointingDeviceDownOnLine        = NO;
         self.labelField                 = CPTScatterPlotFieldY;
+        fillSpacePath                   = TRUE;
     }
     return self;
 }
@@ -785,7 +788,12 @@ NSString *const CPTScatterPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot sym
 
                 CGContextBeginPath(context);
                 CGContextAddPath(context, dataLinePath);
-                [theFill fillPathInContext:context];
+                if (self.fillSpacePath) {
+                    [theFill fillPathInContext:context];
+                }
+                else {
+                    [theFill fillPathWithinRect:self.plotArea.bounds inContext:context];
+                }
 
                 CGPathRelease(dataLinePath);
 
@@ -808,7 +816,12 @@ NSString *const CPTScatterPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot sym
             CGContextBeginPath(context);
             CGContextAddPath(context, dataLinePath);
             [theLineStyle setLineStyleInContext:context];
-            [theLineStyle strokePathInContext:context];
+            if (self.fillSpacePath) {
+                [theLineStyle strokePathInContext:context];
+            }
+            else {
+                [theLineStyle strokePathWithinRect:self.plotArea.bounds inContext:context];
+            }
             CGPathRelease(dataLinePath);
         }
 

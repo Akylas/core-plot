@@ -25,6 +25,7 @@
 -(void)setLineStyleInContext:(CGContextRef)context;
 -(void)strokePathInContext:(CGContextRef)context;
 -(void)strokeRect:(CGRect)rect inContext:(CGContextRef)context;
+-(void)strokePathWithinRect:(CGRect)rect inContext:(CGContextRef)context;
 /// @}
 
 @end

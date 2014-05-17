@@ -230,6 +230,7 @@ typedef NS_ENUM (NSInteger, CPTScatterPlotInterpolation) {
 @property (nonatomic, readwrite, copy) CPTPlotSymbol *plotSymbol;
 @property (nonatomic, readwrite, copy) CPTFill *areaFill;
 @property (nonatomic, readwrite, copy) CPTFill *areaFill2;
+@property (nonatomic, readwrite, assign) BOOL fillSpacePath;
 /// @}
 
 /// @name User Interaction
