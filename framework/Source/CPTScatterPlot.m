@@ -700,6 +700,16 @@ NSString *const CPTScatterPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot sym
 #pragma mark -
 #pragma mark Drawing
 
+
+- (BOOL)compare:(NSDecimal)leftOperand equal:(NSDecimal)rightOperand {
+    BOOL returnValue = NO;
+    NSComparisonResult result = NSDecimalCompare(&leftOperand, &rightOperand);
+    if (result == NSOrderedSame) { // if the left operand is greater than the right operand
+    	returnValue = YES;
+    }
+    return returnValue;
+}
+
 /// @cond
 
 -(void)renderAsVectorInContext:(CGContextRef)context
@@ -783,7 +793,13 @@ NSString *const CPTScatterPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot sym
                 if ( self.alignsPointsToPixels ) {
                     baseLinePoint = CPTAlignIntegralPointToUserSpace(context, baseLinePoint);
                 }
-
+                if ([self compare:theAreaBaseValue equal:[[NSDecimalNumber maximumDecimalNumber] decimalValue]])
+                {
+                    baseLinePoint.y = self.plotArea.bounds.size.height;
+                } else if ([self compare:theAreaBaseValue equal:[[NSDecimalNumber minimumDecimalNumber] decimalValue]])
+                {
+                    baseLinePoint.y = 0;
+                }
                 CGPathRef dataLinePath = [self newDataLinePathForViewPoints:viewPoints indexRange:viewIndexRange baselineYValue:baseLinePoint.y];
 
                 CGContextBeginPath(context);
