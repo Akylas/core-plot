@@ -1158,14 +1158,15 @@ NSString *const CPTBarPlotBindingBarLineStyles = @"barLineStyles"; ///< Bar line
 
 +(BOOL)needsDisplayForKey:(NSString *)aKey
 {
-    static NSSet *keys = nil;
+    static NSSet *keys               = nil;
+    static dispatch_once_t onceToken = 0;
 
-    if ( !keys ) {
+    dispatch_once(&onceToken, ^{
         keys = [NSSet setWithArray:@[@"barCornerRadius",
                                      @"barBaseCornerRadius",
                                      @"barOffsetScale",
                                      @"barWidthScale"]];
-    }
+    });
 
     if ( [keys containsObject:aKey] ) {
         return YES;
@@ -1693,6 +1694,27 @@ NSString *const CPTBarPlotBindingBarLineStyles = @"barLineStyles"; ///< Bar line
             break;
     }
     return result;
+}
+
+-(CPTCoordinate)coordinateForFieldIdentifier:(NSUInteger)field
+{
+    CPTCoordinate coordinate = CPTCoordinateNone;
+
+    switch ( field ) {
+        case CPTBarPlotFieldBarLocation:
+            coordinate = (self.barsAreHorizontal ? CPTCoordinateY : CPTCoordinateX);
+            break;
+
+        case CPTBarPlotFieldBarTip:
+        case CPTBarPlotFieldBarBase:
+            coordinate = (self.barsAreHorizontal ? CPTCoordinateX : CPTCoordinateY);
+            break;
+
+        default:
+            break;
+    }
+
+    return coordinate;
 }
 
 /// @endcond

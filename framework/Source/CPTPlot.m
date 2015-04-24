@@ -16,6 +16,7 @@
 #import "CPTTextLayer.h"
 #import "CPTUtilities.h"
 #import "NSCoderExtensions.h"
+#import <Accelerate/Accelerate.h>
 #import <tgmath.h>
 
 /** @defgroup plotAnimation Plots
@@ -444,10 +445,14 @@ NSString *const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data labels.
 #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
 #else
 
+/// @cond
+
 -(Class)valueClassForBinding:(NSString *)binding
 {
     return [NSArray class];
 }
+
+/// @endcond
 #endif
 
 #pragma mark -
@@ -475,12 +480,13 @@ NSString *const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data labels.
 
 +(BOOL)needsDisplayForKey:(NSString *)aKey
 {
-    static NSSet *keys = nil;
+    static NSSet *keys               = nil;
+    static dispatch_once_t onceToken = 0;
 
-    if ( !keys ) {
+    dispatch_once(&onceToken, ^{
         keys = [NSSet setWithArray:@[@"labelOffset",
                                      @"labelRotation"]];
-    }
+    });
 
     if ( [keys containsObject:aKey] ) {
         return YES;
@@ -696,11 +702,12 @@ NSString *const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data labels.
  **/
 +(id)nilData
 {
-    static id nilObject = nil;
+    static id nilObject              = nil;
+    static dispatch_once_t onceToken = 0;
 
-    if ( !nilObject ) {
+    dispatch_once(&onceToken, ^{
         nilObject = [[NSObject alloc] init];
-    }
+    });
 
     return nilObject;
 }
@@ -746,7 +753,7 @@ NSString *const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data labels.
             NSMutableArray *fieldValues = [NSMutableArray arrayWithCapacity:indexRange.length];
             for ( recordIndex = indexRange.location; recordIndex < indexRange.location + indexRange.length; recordIndex++ ) {
                 if ( respondsToSingleValueSelector ) {
-                    NSNumber *number = [theDataSource numberForPlot:self field:fieldEnum recordIndex:recordIndex];
+                    id number = [theDataSource numberForPlot:self field:fieldEnum recordIndex:recordIndex];
                     if ( number ) {
                         [fieldValues addObject:number];
                     }
@@ -907,30 +914,77 @@ NSString *const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data labels.
 {
     NSNumber *cacheKey = @(fieldEnum);
 
+    CPTCoordinate coordinate   = [self coordinateForFieldIdentifier:fieldEnum];
+    CPTPlotSpace *thePlotSpace = self.plotSpace;
+
     if ( numbers ) {
-        CPTMutableNumericData *mutableNumbers = [self numericDataForNumbers:numbers];
+        switch ( [thePlotSpace scaleTypeForCoordinate:coordinate] ) {
+            case CPTScaleTypeLinear:
+            case CPTScaleTypeLog:
+            {
+                CPTMutableNumericData *mutableNumbers = [self numericDataForNumbers:numbers];
 
-        NSUInteger sampleCount = mutableNumbers.numberOfSamples;
-        if ( sampleCount > 0 ) {
-            (self.cachedData)[cacheKey] = mutableNumbers;
-        }
-        else {
-            [self.cachedData removeObjectForKey:cacheKey];
-        }
+                NSUInteger sampleCount = mutableNumbers.numberOfSamples;
+                if ( sampleCount > 0 ) {
+                    (self.cachedData)[cacheKey] = mutableNumbers;
+                }
+                else {
+                    [self.cachedData removeObjectForKey:cacheKey];
+                }
 
-        self.cachedDataCount = sampleCount;
+                self.cachedDataCount = sampleCount;
 
-        switch ( self.cachePrecision ) {
-            case CPTPlotCachePrecisionAuto:
-                [self setCachedDataType:mutableNumbers.dataType];
-                break;
+                switch ( self.cachePrecision ) {
+                    case CPTPlotCachePrecisionAuto:
+                        [self setCachedDataType:mutableNumbers.dataType];
+                        break;
 
-            case CPTPlotCachePrecisionDouble:
-                [self setCachedDataType:self.doubleDataType];
-                break;
+                    case CPTPlotCachePrecisionDouble:
+                        [self setCachedDataType:self.doubleDataType];
+                        break;
 
-            case CPTPlotCachePrecisionDecimal:
-                [self setCachedDataType:self.decimalDataType];
+                    case CPTPlotCachePrecisionDecimal:
+                        [self setCachedDataType:self.decimalDataType];
+                        break;
+                }
+            }
+            break;
+
+            case CPTScaleTypeCategory:
+            {
+                NSArray *samples = (NSArray *)numbers;
+                if ( [samples isKindOfClass:[NSArray class]] ) {
+                    [thePlotSpace setCategories:samples forCoordinate:coordinate];
+
+                    NSUInteger sampleCount = samples.count;
+                    if ( sampleCount > 0 ) {
+                        NSMutableArray *indices = [[NSMutableArray alloc] initWithCapacity:sampleCount];
+
+                        for ( NSString *category in samples ) {
+                            [indices addObject:@([thePlotSpace indexOfCategory:category forCoordinate:coordinate])];
+                        }
+
+                        CPTNumericDataType dataType = (self.cachePrecision == CPTPlotCachePrecisionDecimal ? self.decimalDataType : self.doubleDataType);
+
+                        CPTMutableNumericData *mutableNumbers = [[CPTMutableNumericData alloc] initWithArray:indices
+                                                                                                    dataType:dataType
+                                                                                                       shape:nil];
+
+                        (self.cachedData)[cacheKey] = mutableNumbers;
+
+                        self.cachedDataCount = sampleCount;
+                    }
+                    else {
+                        [self.cachedData removeObjectForKey:cacheKey];
+                    }
+                }
+                else {
+                    [self.cachedData removeObjectForKey:cacheKey];
+                }
+            }
+            break;
+
+            default:
                 break;
         }
     }
@@ -950,35 +1004,78 @@ NSString *const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data labels.
 -(void)cacheNumbers:(id)numbers forField:(NSUInteger)fieldEnum atRecordIndex:(NSUInteger)idx
 {
     if ( numbers ) {
-        CPTMutableNumericData *mutableNumbers = [self numericDataForNumbers:numbers];
+        NSNumber *cacheKey     = @(fieldEnum);
+        NSUInteger sampleCount = 0;
 
-        NSUInteger sampleCount = mutableNumbers.numberOfSamples;
-        if ( sampleCount > 0 ) {
-            // Ensure the new data is the same type as the cache
-            switch ( self.cachePrecision ) {
-                case CPTPlotCachePrecisionAuto:
-                    [self setCachedDataType:mutableNumbers.dataType];
-                    break;
+        CPTCoordinate coordinate   = [self coordinateForFieldIdentifier:fieldEnum];
+        CPTPlotSpace *thePlotSpace = self.plotSpace;
 
-                case CPTPlotCachePrecisionDouble:
-                {
-                    CPTNumericDataType newType = self.doubleDataType;
-                    [self setCachedDataType:newType];
-                    mutableNumbers.dataType = newType;
+        CPTMutableNumericData *mutableNumbers = nil;
+
+        switch ( [thePlotSpace scaleTypeForCoordinate:coordinate] ) {
+            case CPTScaleTypeLinear:
+            case CPTScaleTypeLog:
+            {
+                mutableNumbers = [self numericDataForNumbers:numbers];
+
+                sampleCount = mutableNumbers.numberOfSamples;
+                if ( sampleCount > 0 ) {
+                    // Ensure the new data is the same type as the cache
+                    switch ( self.cachePrecision ) {
+                        case CPTPlotCachePrecisionAuto:
+                            [self setCachedDataType:mutableNumbers.dataType];
+                            break;
+
+                        case CPTPlotCachePrecisionDouble:
+                        {
+                            CPTNumericDataType newType = self.doubleDataType;
+                            [self setCachedDataType:newType];
+                            mutableNumbers.dataType = newType;
+                        }
+                        break;
+
+                        case CPTPlotCachePrecisionDecimal:
+                        {
+                            CPTNumericDataType newType = self.decimalDataType;
+                            [self setCachedDataType:newType];
+                            mutableNumbers.dataType = newType;
+                        }
+                        break;
+                    }
                 }
-                break;
-
-                case CPTPlotCachePrecisionDecimal:
-                {
-                    CPTNumericDataType newType = self.decimalDataType;
-                    [self setCachedDataType:newType];
-                    mutableNumbers.dataType = newType;
-                }
-                break;
             }
+            break;
 
+            case CPTScaleTypeCategory:
+            {
+                NSArray *samples = (NSArray *)numbers;
+                if ( [samples isKindOfClass:[NSArray class]] ) {
+                    sampleCount = samples.count;
+                    if ( sampleCount > 0 ) {
+                        NSMutableArray *indices = [[NSMutableArray alloc] initWithCapacity:sampleCount];
+
+                        for ( NSString *category in samples ) {
+                            [thePlotSpace addCategory:category forCoordinate:coordinate];
+                            [indices addObject:@([thePlotSpace indexOfCategory:category forCoordinate:coordinate])];
+                        }
+
+                        CPTNumericDataType dataType = (self.cachePrecision == CPTPlotCachePrecisionDecimal ? self.decimalDataType : self.doubleDataType);
+
+                        mutableNumbers = [[CPTMutableNumericData alloc] initWithArray:indices
+                                                                             dataType:dataType
+                                                                                shape:nil];
+                    }
+                }
+            }
+            break;
+
+            default:
+                [self.cachedData removeObjectForKey:cacheKey];
+                break;
+        }
+
+        if ( mutableNumbers && (sampleCount > 0) ) {
             // Ensure the data cache exists and is the right size
-            NSNumber *cacheKey                   = @(fieldEnum);
             CPTMutableNumericData *cachedNumbers = (self.cachedData)[cacheKey];
             if ( !cachedNumbers ) {
                 cachedNumbers = [CPTMutableNumericData numericDataWithData:[NSData data]
@@ -1000,6 +1097,7 @@ NSString *const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data labels.
 
             [self relabelIndexRange:NSMakeRange(idx, sampleCount)];
         }
+
         [self setNeedsDisplay];
     }
 }
@@ -1189,12 +1287,11 @@ NSString *const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data labels.
 -(CPTNumericDataType)doubleDataType
 {
     static CPTNumericDataType dataType;
-    static BOOL initialized = NO;
+    static dispatch_once_t onceToken = 0;
 
-    if ( !initialized ) {
-        dataType    = CPTDataType( CPTFloatingPointDataType, sizeof(double), CFByteOrderGetCurrent() );
-        initialized = YES;
-    }
+    dispatch_once(&onceToken, ^{
+        dataType = CPTDataType( CPTFloatingPointDataType, sizeof(double), CFByteOrderGetCurrent() );
+    });
 
     return dataType;
 }
@@ -1202,12 +1299,11 @@ NSString *const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data labels.
 -(CPTNumericDataType)decimalDataType
 {
     static CPTNumericDataType dataType;
-    static BOOL initialized = NO;
+    static dispatch_once_t onceToken = 0;
 
-    if ( !initialized ) {
-        dataType    = CPTDataType( CPTDecimalDataType, sizeof(NSDecimal), CFByteOrderGetCurrent() );
-        initialized = YES;
-    }
+    dispatch_once(&onceToken, ^{
+        dataType = CPTDataType( CPTDecimalDataType, sizeof(NSDecimal), CFByteOrderGetCurrent() );
+    });
 
     return dataType;
 }
@@ -1309,6 +1405,27 @@ NSString *const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data labels.
 
             vDSP_minvD(doubles, 1, &min, (vDSP_Length)numberOfSamples);
             vDSP_maxvD(doubles, 1, &max, (vDSP_Length)numberOfSamples);
+
+            if ( isnan(min) || isnan(max) ) {
+                // vDSP functions may return NAN if any data in the array is NAN
+                min = INFINITY;
+                max = -INFINITY;
+
+                const double *lastSample = doubles + numberOfSamples;
+
+                while ( doubles < lastSample ) {
+                    double value = *doubles++;
+
+                    if ( !isnan(value) ) {
+                        if ( value < min ) {
+                            min = value;
+                        }
+                        if ( value > max ) {
+                            max = value;
+                        }
+                    }
+                }
+            }
 
             if ( max >= min ) {
                 range = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromDouble(min) length:CPTDecimalFromDouble(max - min)];
@@ -2053,6 +2170,15 @@ NSString *const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data labels.
 -(NSArray *)fieldIdentifiersForCoordinate:(CPTCoordinate)coord
 {
     return @[];
+}
+
+/** @brief The coordinate value that corresponds to a particular field identifier.
+ *  @param field The field identifier for which the corresponding coordinate is desired.
+ *  @return The coordinate that corresponds to a particular field identifier or #CPTCoordinateNone if there is no matching coordinate.
+ */
+-(CPTCoordinate)coordinateForFieldIdentifier:(NSUInteger)field
+{
+    return CPTCoordinateNone;
 }
 
 #pragma mark -

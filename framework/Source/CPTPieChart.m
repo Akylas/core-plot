@@ -622,7 +622,7 @@ static const CGFloat colorLookupTable[10][3] =
     CGPoint anchor        = self.centerAnchor;
     CGPoint centerPoint   = CPTPointMake(plotAreaBounds.origin.x + plotAreaBounds.size.width * anchor.x,
                                          plotAreaBounds.origin.y + plotAreaBounds.size.height * anchor.y);
-    centerPoint = [self convertPoint:centerPoint fromLayer:self.plotArea];
+    centerPoint = [self convertPoint:centerPoint fromLayer:thePlotArea];
     if ( self.alignsPointsToPixels ) {
         centerPoint = CPTAlignPointToUserSpace(context, centerPoint);
     }
@@ -915,15 +915,16 @@ static const CGFloat colorLookupTable[10][3] =
 
 +(BOOL)needsDisplayForKey:(NSString *)aKey
 {
-    static NSSet *keys = nil;
+    static NSSet *keys               = nil;
+    static dispatch_once_t onceToken = 0;
 
-    if ( !keys ) {
+    dispatch_once(&onceToken, ^{
         keys = [NSSet setWithArray:@[@"pieRadius",
                                      @"pieInnerRadius",
                                      @"startAngle",
                                      @"endAngle",
                                      @"centerAnchor"]];
-    }
+    });
 
     if ( [keys containsObject:aKey] ) {
         return YES;
@@ -948,11 +949,6 @@ static const CGFloat colorLookupTable[10][3] =
 -(NSArray *)fieldIdentifiers
 {
     return @[@(CPTPieChartFieldSliceWidth)];
-}
-
--(NSArray *)fieldIdentifiersForCoordinate:(CPTCoordinate)coord
-{
-    return nil;
 }
 
 /// @endcond

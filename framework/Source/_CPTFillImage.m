@@ -108,6 +108,12 @@
     [coder encodeObject:self.fillImage forKey:@"_CPTFillImage.fillImage"];
 }
 
+/// @endcond
+
+/** @brief Returns an object initialized from data in a given unarchiver.
+ *  @param coder An unarchiver object.
+ *  @return An object initialized from data in a given unarchiver.
+ */
 -(instancetype)initWithCoder:(NSCoder *)coder
 {
     if ( (self = [super init]) ) {
@@ -115,7 +121,5 @@
     }
     return self;
 }
-
-/// @endcond
 
 @end

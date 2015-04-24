@@ -10,12 +10,14 @@
 
 +(NSDateFormatter *)yahooCSVDateFormatter
 {
-    static NSDateFormatter *df = nil;
+    static NSDateFormatter *df       = nil;
+    static dispatch_once_t onceToken = 0;
 
-    if ( !df ) {
+    dispatch_once(&onceToken, ^{
         df = [[NSDateFormatter alloc] init];
         [df setDateFormat:@"yyyy-MM-dd"];
-    }
+    });
+
     return df;
 }
 
@@ -23,7 +25,7 @@
 
 @implementation  NSDictionary(APFinancalData)
 
-+(id)dictionaryWithCSVLine:(NSString *)csvLine;
++(id)dictionaryWithCSVLine:(NSString *)csvLine
 {
     NSArray *csvChunks = [csvLine componentsSeparatedByString:@","];
 
@@ -32,6 +34,7 @@
     // Date,Open,High,Low,Close,Volume,Adj Close
     // 2009-06-08,143.82,144.23,139.43,143.85,33255400,143.85
     NSDate *theDate = [[NSDateFormatter yahooCSVDateFormatter] dateFromString:(NSString *)csvChunks[0]];
+
     csvDict[@"date"] = theDate;
     NSDecimalNumber *theOpen = [NSDecimalNumber decimalNumberWithString:(NSString *)csvChunks[1]];
     csvDict[@"open"] = theOpen;

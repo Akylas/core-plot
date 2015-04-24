@@ -278,6 +278,12 @@
     [encoder encodeDecimal:self.length forKey:@"CPTPlotRange.length"];
 }
 
+/// @endcond
+
+/** @brief Returns an object initialized from data in a given unarchiver.
+ *  @param decoder An unarchiver object.
+ *  @return An object initialized from data in a given unarchiver.
+ */
 -(instancetype)initWithCoder:(NSCoder *)decoder
 {
     if ( (self = [super init]) ) {
@@ -287,8 +293,6 @@
 
     return self;
 }
-
-/// @endcond
 
 #pragma mark -
 #pragma mark Checking Containership
@@ -309,6 +313,22 @@
 -(BOOL)containsDouble:(double)number
 {
     return (number >= self.minLimitDouble) && (number <= self.maxLimitDouble);
+}
+
+/** @brief Determines whether a given number is inside the range.
+ *  @param number The number to check.
+ *  @return @YES if @ref location ≤ @par{number} ≤ @ref end.
+ **/
+-(BOOL)containsNumber:(NSNumber *)number
+{
+    if ( [number isKindOfClass:[NSDecimalNumber class]] ) {
+        NSDecimal numericValue = number.decimalValue;
+        return CPTDecimalGreaterThanOrEqualTo(numericValue, self.minLimit) && CPTDecimalLessThanOrEqualTo(numericValue, self.maxLimit);
+    }
+    else {
+        double numericValue = number.doubleValue;
+        return (numericValue >= self.minLimitDouble) && (numericValue <= self.maxLimitDouble);
+    }
 }
 
 /** @brief Determines whether a given range is equal to the range of the receiver.

@@ -8,6 +8,9 @@
 
 @interface CPTPlotSpaceAnnotation()
 
+@property (nonatomic, readwrite) NSDecimal *decimalAnchor;
+@property (nonatomic, readwrite) NSUInteger anchorCount;
+
 -(void)setContentNeedsLayout;
 
 @end
@@ -34,6 +37,9 @@
  **/
 @synthesize plotSpace;
 
+@synthesize decimalAnchor;
+@synthesize anchorCount;
+
 #pragma mark -
 #pragma mark Init/Dealloc
 
@@ -54,8 +60,8 @@
     NSParameterAssert(newPlotSpace);
 
     if ( (self = [super init]) ) {
-        plotSpace       = newPlotSpace;
-        anchorPlotPoint = [newPlotPoint copy];
+        plotSpace            = newPlotSpace;
+        self.anchorPlotPoint = newPlotPoint;
 
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(setContentNeedsLayout)
@@ -78,6 +84,7 @@
 -(void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    free(decimalAnchor);
 }
 
 /// @endcond
@@ -95,6 +102,12 @@
     [coder encodeConditionalObject:self.plotSpace forKey:@"CPTPlotSpaceAnnotation.plotSpace"];
 }
 
+/// @endcond
+
+/** @brief Returns an object initialized from data in a given unarchiver.
+ *  @param coder An unarchiver object.
+ *  @return An object initialized from data in a given unarchiver.
+ */
 -(instancetype)initWithCoder:(NSCoder *)coder
 {
     if ( (self = [super initWithCoder:coder]) ) {
@@ -103,8 +116,6 @@
     }
     return self;
 }
-
-/// @endcond
 
 #pragma mark -
 #pragma mark Layout
@@ -125,16 +136,9 @@
         if ( hostLayer ) {
             NSArray *plotAnchor = self.anchorPlotPoint;
             if ( plotAnchor ) {
-                NSUInteger anchorCount = plotAnchor.count;
-
                 // Get plot area point
-                NSDecimal *decimalPoint = malloc(sizeof(NSDecimal) * anchorCount);
-                for ( NSUInteger i = 0; i < anchorCount; i++ ) {
-                    decimalPoint[i] = [plotAnchor[i] decimalValue];
-                }
                 CPTPlotSpace *thePlotSpace      = self.plotSpace;
-                CGPoint plotAreaViewAnchorPoint = [thePlotSpace plotAreaViewPointForPlotPoint:decimalPoint numberOfCoordinates:anchorCount];
-                free(decimalPoint);
+                CGPoint plotAreaViewAnchorPoint = [thePlotSpace plotAreaViewPointForPlotPoint:self.decimalAnchor numberOfCoordinates:self.anchorCount];
 
                 CGPoint newPosition;
                 CPTGraph *theGraph    = thePlotSpace.graph;
@@ -169,7 +173,24 @@
 {
     if ( anchorPlotPoint != newPlotPoint ) {
         anchorPlotPoint = [newPlotPoint copy];
+
+        self.anchorCount = anchorPlotPoint.count;
+
+        NSDecimal *decimalPoint = malloc(sizeof(NSDecimal) * self.anchorCount);
+        for ( NSUInteger i = 0; i < self.anchorCount; i++ ) {
+            decimalPoint[i] = [anchorPlotPoint[i] decimalValue];
+        }
+        self.decimalAnchor = decimalPoint;
+
         [self setContentNeedsLayout];
+    }
+}
+
+-(void)setDecimalAnchor:(NSDecimal *)newAnchor
+{
+    if ( decimalAnchor != newAnchor ) {
+        free(decimalAnchor);
+        decimalAnchor = newAnchor;
     }
 }
 

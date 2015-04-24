@@ -355,12 +355,13 @@ NSString *const CPTGraphPlotSpaceNotificationKey       = @"CPTGraphPlotSpaceNoti
 
 +(BOOL)needsDisplayForKey:(NSString *)aKey
 {
-    static NSSet *keys = nil;
+    static NSSet *keys               = nil;
+    static dispatch_once_t onceToken = 0;
 
-    if ( !keys ) {
+    dispatch_once(&onceToken, ^{
         keys = [NSSet setWithArray:@[@"titleDisplacement",
                                      @"legendDisplacement"]];
-    }
+    });
 
     if ( [keys containsObject:aKey] ) {
         return YES;
@@ -381,6 +382,7 @@ NSString *const CPTGraphPlotSpaceNotificationKey       = @"CPTGraphPlotSpaceNoti
 -(void)reloadData
 {
     [self.plots makeObjectsPerformSelector:@selector(reloadData)];
+    [self.plotSpaces makeObjectsPerformSelector:@selector(removeAllCategories)];
 }
 
 /**

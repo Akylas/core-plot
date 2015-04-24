@@ -131,6 +131,8 @@
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    [super touchesBegan:touches withEvent:event];
+
     // Ignore pinch or other multitouch gestures
     if ( [[event allTouches] count] > 1 ) {
         return;
@@ -149,11 +151,17 @@
     else {
         pointOfTouch = [self.layer convertPoint:pointOfTouch toLayer:theHostedGraph];
     }
-    [theHostedGraph pointingDeviceDownEvent:event atPoint:pointOfTouch];
+    BOOL handled = [theHostedGraph pointingDeviceDownEvent:event atPoint:pointOfTouch];
+
+    if ( !handled ) {
+        [self.nextResponder touchesBegan:touches withEvent:event];
+    }
 }
 
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    [super touchesMoved:touches withEvent:event];
+
     CPTGraph *theHostedGraph = self.hostedGraph;
 
     theHostedGraph.frame = self.bounds;
@@ -167,11 +175,17 @@
     else {
         pointOfTouch = [self.layer convertPoint:pointOfTouch toLayer:theHostedGraph];
     }
-    [theHostedGraph pointingDeviceDraggedEvent:event atPoint:pointOfTouch];
+    BOOL handled = [theHostedGraph pointingDeviceDraggedEvent:event atPoint:pointOfTouch];
+
+    if ( !handled ) {
+        [self.nextResponder touchesMoved:touches withEvent:event];
+    }
 }
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    [super touchesEnded:touches withEvent:event];
+
     CPTGraph *theHostedGraph = self.hostedGraph;
 
     theHostedGraph.frame = self.bounds;
@@ -185,12 +199,22 @@
     else {
         pointOfTouch = [self.layer convertPoint:pointOfTouch toLayer:theHostedGraph];
     }
-    [theHostedGraph pointingDeviceUpEvent:event atPoint:pointOfTouch];
+    BOOL handled = [theHostedGraph pointingDeviceUpEvent:event atPoint:pointOfTouch];
+
+    if ( !handled ) {
+        [self.nextResponder touchesEnded:touches withEvent:event];
+    }
 }
 
 -(void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    [self.hostedGraph pointingDeviceCancelledEvent:event];
+    [super touchesCancelled:touches withEvent:event];
+
+    BOOL handled = [self.hostedGraph pointingDeviceCancelledEvent:event];
+
+    if ( !handled ) {
+        [self.nextResponder touchesCancelled:touches withEvent:event];
+    }
 }
 
 /// @endcond

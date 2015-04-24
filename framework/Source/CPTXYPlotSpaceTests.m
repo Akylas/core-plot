@@ -18,7 +18,7 @@
 
 -(void)setUp
 {
-    self.graph = [[CPTXYGraph alloc] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 50.0)];
+    self.graph = [[CPTXYGraph alloc] initWithFrame:CPTRectMake(0.0, 0.0, 100.0, 50.0)];
 
     self.graph.paddingLeft   = 0.0;
     self.graph.paddingRight  = 0.0;
@@ -54,8 +54,8 @@
 
     CGPoint viewPoint = [plotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2];
 
-    STAssertEqualsWithAccuracy(viewPoint.x, (CGFloat)50.0, (CGFloat)0.01, @"");
-    STAssertEqualsWithAccuracy(viewPoint.y, (CGFloat)25.0, (CGFloat)0.01, @"");
+    XCTAssertEqualWithAccuracy(viewPoint.x, CPTFloat(50.0), CPTFloat(0.01), @"");
+    XCTAssertEqualWithAccuracy(viewPoint.y, CPTFloat(25.0), CPTFloat(0.01), @"");
 
     plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromDouble(0.0)
                                                     length:CPTDecimalFromDouble(10.0)];
@@ -64,8 +64,8 @@
 
     viewPoint = [plotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2];
 
-    STAssertEqualsWithAccuracy(viewPoint.x, (CGFloat)50.0, (CGFloat)0.01, @"");
-    STAssertEqualsWithAccuracy(viewPoint.y, (CGFloat)50.0, (CGFloat)0.01, @"");
+    XCTAssertEqualWithAccuracy(viewPoint.x, CPTFloat(50.0), CPTFloat(0.01), @"");
+    XCTAssertEqualWithAccuracy(viewPoint.y, CPTFloat(50.0), CPTFloat(0.01), @"");
 }
 
 -(void)testViewPointForDoublePrecisionPlotPointLinear
@@ -86,8 +86,8 @@
 
     CGPoint viewPoint = [plotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
 
-    STAssertEqualsWithAccuracy(viewPoint.x, (CGFloat)50.0, (CGFloat)0.01, @"");
-    STAssertEqualsWithAccuracy(viewPoint.y, (CGFloat)25.0, (CGFloat)0.01, @"");
+    XCTAssertEqualWithAccuracy(viewPoint.x, CPTFloat(50.0), CPTFloat(0.01), @"");
+    XCTAssertEqualWithAccuracy(viewPoint.y, CPTFloat(25.0), CPTFloat(0.01), @"");
 
     plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromDouble(0.0)
                                                     length:CPTDecimalFromDouble(10.0)];
@@ -96,8 +96,8 @@
 
     viewPoint = [plotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
 
-    STAssertEqualsWithAccuracy(viewPoint.x, (CGFloat)50.0, (CGFloat)0.01, @"");
-    STAssertEqualsWithAccuracy(viewPoint.y, (CGFloat)50.0, (CGFloat)0.01, @"");
+    XCTAssertEqualWithAccuracy(viewPoint.x, CPTFloat(50.0), CPTFloat(0.01), @"");
+    XCTAssertEqualWithAccuracy(viewPoint.y, CPTFloat(50.0), CPTFloat(0.01), @"");
 }
 
 #pragma mark -
@@ -121,8 +121,8 @@
 
     CGPoint viewPoint = [plotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2];
 
-    STAssertEqualsWithAccuracy(viewPoint.x, (CGFloat)50.0, (CGFloat)0.01, @"");
-    STAssertEqualsWithAccuracy(viewPoint.y, (CGFloat)25.0, (CGFloat)0.01, @"");
+    XCTAssertEqualWithAccuracy(viewPoint.x, CPTFloat(50.0), CPTFloat(0.01), @"");
+    XCTAssertEqualWithAccuracy(viewPoint.y, CPTFloat(25.0), CPTFloat(0.01), @"");
 
     plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromDouble(1.0)
                                                     length:CPTDecimalFromDouble(9.0)];
@@ -131,8 +131,8 @@
 
     viewPoint = [plotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2];
 
-    STAssertEqualsWithAccuracy(viewPoint.x, (CGFloat)50.0, (CGFloat)0.01, @"");
-    STAssertEqualsWithAccuracy(viewPoint.y, -CPTFloat(25.0), (CGFloat)0.01, @"");
+    XCTAssertEqualWithAccuracy(viewPoint.x, CPTFloat(50.0), CPTFloat(0.01), @"");
+    XCTAssertEqualWithAccuracy(viewPoint.y, -CPTFloat(25.0), CPTFloat(0.01), @"");
 }
 
 -(void)testViewPointForDoublePrecisionPlotPointLog
@@ -153,8 +153,8 @@
 
     CGPoint viewPoint = [plotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
 
-    STAssertEqualsWithAccuracy(viewPoint.x, (CGFloat)50.0, (CGFloat)0.01, @"");
-    STAssertEqualsWithAccuracy(viewPoint.y, (CGFloat)25.0, (CGFloat)0.01, @"");
+    XCTAssertEqualWithAccuracy(viewPoint.x, CPTFloat(50.0), CPTFloat(0.01), @"");
+    XCTAssertEqualWithAccuracy(viewPoint.y, CPTFloat(25.0), CPTFloat(0.01), @"");
 
     plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromDouble(1.0)
                                                     length:CPTDecimalFromDouble(9.0)];
@@ -163,8 +163,8 @@
 
     viewPoint = [plotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
 
-    STAssertEqualsWithAccuracy(viewPoint.x, (CGFloat)50.0, (CGFloat)0.01, @"");
-    STAssertEqualsWithAccuracy(viewPoint.y, -CPTFloat(25.0), (CGFloat)0.01, @"");
+    XCTAssertEqualWithAccuracy(viewPoint.x, CPTFloat(50.0), CPTFloat(0.01), @"");
+    XCTAssertEqualWithAccuracy(viewPoint.y, -CPTFloat(25.0), CPTFloat(0.01), @"");
 }
 
 #pragma mark -
@@ -183,15 +183,15 @@
                                                     length:CPTDecimalFromDouble(10.0)];
 
     NSDecimal plotPoint[2];
-    CGPoint viewPoint = CGPointMake(50.0, 25.0);
+    CGPoint viewPoint = CPTPointMake(50.0, 25.0);
     NSString *errMessage;
 
     [plotSpace plotPoint:plotPoint numberOfCoordinates:2 forPlotAreaViewPoint:viewPoint];
 
     errMessage = [NSString stringWithFormat:@"plotPoint[CPTCoordinateX] was %@", NSDecimalString(&plotPoint[CPTCoordinateX], nil)];
-    STAssertTrue(CPTDecimalEquals( plotPoint[CPTCoordinateX], CPTDecimalFromDouble(5.0) ), errMessage);
+    XCTAssertTrue(CPTDecimalEquals( plotPoint[CPTCoordinateX], CPTDecimalFromDouble(5.0) ), @"%@", errMessage);
     errMessage = [NSString stringWithFormat:@"plotPoint[CPTCoordinateY] was %@", NSDecimalString(&plotPoint[CPTCoordinateY], nil)];
-    STAssertTrue(CPTDecimalEquals( plotPoint[CPTCoordinateY], CPTDecimalFromDouble(5.0) ), errMessage);
+    XCTAssertTrue(CPTDecimalEquals( plotPoint[CPTCoordinateY], CPTDecimalFromDouble(5.0) ), @"%@", errMessage);
 }
 
 -(void)testDoublePrecisionPlotPointForViewPointLinear
@@ -207,15 +207,15 @@
                                                     length:CPTDecimalFromDouble(10.0)];
 
     double plotPoint[2];
-    CGPoint viewPoint = CGPointMake(50.0, 25.0);
+    CGPoint viewPoint = CPTPointMake(50.0, 25.0);
     NSString *errMessage;
 
     [plotSpace doublePrecisionPlotPoint:plotPoint numberOfCoordinates:2 forPlotAreaViewPoint:viewPoint];
 
     errMessage = [NSString stringWithFormat:@"plotPoint[CPTCoordinateX] was %g", plotPoint[CPTCoordinateX]];
-    STAssertEquals(plotPoint[CPTCoordinateX], 5.0, errMessage);
+    XCTAssertEqual(plotPoint[CPTCoordinateX], 5.0, @"%@", errMessage);
     errMessage = [NSString stringWithFormat:@"plotPoint[CPTCoordinateY] was %g", plotPoint[CPTCoordinateY]];
-    STAssertEquals(plotPoint[CPTCoordinateY], 5.0, errMessage);
+    XCTAssertEqual(plotPoint[CPTCoordinateY], 5.0, @"%@", errMessage);
 }
 
 #pragma mark -
@@ -234,15 +234,15 @@
                                                     length:CPTDecimalFromDouble(9.0)];
 
     NSDecimal plotPoint[2];
-    CGPoint viewPoint = CGPointMake(50.0, 25.0);
+    CGPoint viewPoint = CPTPointMake(50.0, 25.0);
     NSString *errMessage;
 
     [plotSpace plotPoint:plotPoint numberOfCoordinates:2 forPlotAreaViewPoint:viewPoint];
 
     errMessage = [NSString stringWithFormat:@"plotPoint[CPTCoordinateX] was %@", NSDecimalString(&plotPoint[CPTCoordinateX], nil)];
-    STAssertTrue(CPTDecimalEquals( plotPoint[CPTCoordinateX], CPTDecimalFromDouble( sqrt(10.0) ) ), errMessage);
+    XCTAssertTrue(CPTDecimalEquals( plotPoint[CPTCoordinateX], CPTDecimalFromDouble( sqrt(10.0) ) ), @"%@", errMessage);
     errMessage = [NSString stringWithFormat:@"plotPoint[CPTCoordinateY] was %@", NSDecimalString(&plotPoint[CPTCoordinateY], nil)];
-    STAssertTrue(CPTDecimalEquals( plotPoint[CPTCoordinateY], CPTDecimalFromDouble( sqrt(10.0) ) ), errMessage);
+    XCTAssertTrue(CPTDecimalEquals( plotPoint[CPTCoordinateY], CPTDecimalFromDouble( sqrt(10.0) ) ), @"%@", errMessage);
 }
 
 -(void)testDoublePrecisionPlotPointForViewPointLog
@@ -258,15 +258,15 @@
                                                     length:CPTDecimalFromDouble(9.0)];
 
     double plotPoint[2];
-    CGPoint viewPoint = CGPointMake(50.0, 25.0);
+    CGPoint viewPoint = CPTPointMake(50.0, 25.0);
     NSString *errMessage;
 
     [plotSpace doublePrecisionPlotPoint:plotPoint numberOfCoordinates:2 forPlotAreaViewPoint:viewPoint];
 
     errMessage = [NSString stringWithFormat:@"plotPoint[CPTCoordinateX] was %g", plotPoint[CPTCoordinateX]];
-    STAssertEquals(plotPoint[CPTCoordinateX], sqrt(10.0), errMessage);
+    XCTAssertEqual(plotPoint[CPTCoordinateX], sqrt(10.0), @"%@", errMessage);
     errMessage = [NSString stringWithFormat:@"plotPoint[CPTCoordinateY] was %g", plotPoint[CPTCoordinateY]];
-    STAssertEquals(plotPoint[CPTCoordinateY], sqrt(10.0), errMessage);
+    XCTAssertEqual(plotPoint[CPTCoordinateY], sqrt(10.0), @"%@", errMessage);
 }
 
 #pragma mark -
@@ -276,8 +276,8 @@
 {
     CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)self.graph.defaultPlotSpace;
 
-    STAssertEqualObjects([plotSpace constrainRange:plotSpace.xRange toGlobalRange:nil], plotSpace.xRange, @"Constrain to nil global range should return original range.");
-    STAssertNil([plotSpace constrainRange:nil toGlobalRange:plotSpace.xRange], @"Constrain nil range should return nil.");
+    XCTAssertEqualObjects([plotSpace constrainRange:plotSpace.xRange toGlobalRange:nil], plotSpace.xRange, @"Constrain to nil global range should return original range.");
+    XCTAssertNil([plotSpace constrainRange:nil toGlobalRange:plotSpace.xRange], @"Constrain nil range should return nil.");
 }
 
 -(void)testConstrainRanges1
@@ -293,7 +293,7 @@
     CPTPlotRange *constrainedRange = [plotSpace constrainRange:existingRange toGlobalRange:globalRange];
     NSString *errMessage           = [NSString stringWithFormat:@"constrainedRange was %@, expected %@", constrainedRange, expectedRange];
 
-    STAssertTrue([constrainedRange isEqualToRange:expectedRange], errMessage);
+    XCTAssertTrue([constrainedRange isEqualToRange:expectedRange], @"%@", errMessage);
 }
 
 -(void)testConstrainRanges2
@@ -309,7 +309,7 @@
     CPTPlotRange *constrainedRange = [plotSpace constrainRange:existingRange toGlobalRange:globalRange];
     NSString *errMessage           = [NSString stringWithFormat:@"constrainedRange was %@, expected %@", constrainedRange, expectedRange];
 
-    STAssertTrue([constrainedRange isEqualToRange:expectedRange], errMessage);
+    XCTAssertTrue([constrainedRange isEqualToRange:expectedRange], @"%@", errMessage);
 }
 
 -(void)testConstrainRanges3
@@ -326,7 +326,7 @@
     CPTPlotRange *constrainedRange = [plotSpace constrainRange:existingRange toGlobalRange:globalRange];
     NSString *errMessage           = [NSString stringWithFormat:@"constrainedRange was %@, expected %@", constrainedRange, expectedRange];
 
-    STAssertTrue([constrainedRange isEqualToRange:expectedRange], errMessage);
+    XCTAssertTrue([constrainedRange isEqualToRange:expectedRange], @"%@", errMessage);
 }
 
 -(void)testConstrainRanges4
@@ -343,7 +343,7 @@
     CPTPlotRange *constrainedRange = [plotSpace constrainRange:existingRange toGlobalRange:globalRange];
     NSString *errMessage           = [NSString stringWithFormat:@"constrainedRange was %@, expected %@", constrainedRange, expectedRange];
 
-    STAssertTrue([constrainedRange isEqualToRange:expectedRange], errMessage);
+    XCTAssertTrue([constrainedRange isEqualToRange:expectedRange], @"%@", errMessage);
 }
 
 #pragma mark -
@@ -370,10 +370,10 @@
                                                                 length:CPTDecimalFromDouble(-20.0)];
 
     NSString *errMessage = [NSString stringWithFormat:@"xRange was %@, expected %@", plotSpace.xRange, expectedRangeX];
-    STAssertTrue([plotSpace.xRange isEqualToRange:expectedRangeX], errMessage);
+    XCTAssertTrue([plotSpace.xRange isEqualToRange:expectedRangeX], @"%@", errMessage);
 
     errMessage = [NSString stringWithFormat:@"yRange was %@, expected %@", plotSpace.yRange, expectedRangeY];
-    STAssertTrue([plotSpace.yRange isEqualToRange:expectedRangeY], errMessage);
+    XCTAssertTrue([plotSpace.yRange isEqualToRange:expectedRangeY], @"%@", errMessage);
 }
 
 -(void)testScaleByAboutPoint2
@@ -397,10 +397,10 @@
                                                                 length:CPTDecimalFromDouble(-5.0)];
 
     NSString *errMessage = [NSString stringWithFormat:@"xRange was %@, expected %@", plotSpace.xRange, expectedRangeX];
-    STAssertTrue([plotSpace.xRange isEqualToRange:expectedRangeX], errMessage);
+    XCTAssertTrue([plotSpace.xRange isEqualToRange:expectedRangeX], @"%@", errMessage);
 
     errMessage = [NSString stringWithFormat:@"yRange was %@, expected %@", plotSpace.yRange, expectedRangeY];
-    STAssertTrue([plotSpace.yRange isEqualToRange:expectedRangeY], errMessage);
+    XCTAssertTrue([plotSpace.yRange isEqualToRange:expectedRangeY], @"%@", errMessage);
 }
 
 #pragma mark -
@@ -418,19 +418,19 @@
     CPTXYPlotSpace *newPlotSpace = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:plotSpace]];
 
     NSString *errMessage = [NSString stringWithFormat:@"xRange was %@, expected %@", plotSpace.xRange, newPlotSpace.xRange];
-    STAssertTrue([plotSpace.xRange isEqualToRange:newPlotSpace.xRange], errMessage);
+    XCTAssertTrue([plotSpace.xRange isEqualToRange:newPlotSpace.xRange], @"%@", errMessage);
 
     errMessage = [NSString stringWithFormat:@"yRange was %@, expected %@", plotSpace.yRange, newPlotSpace.yRange];
-    STAssertTrue([plotSpace.yRange isEqualToRange:newPlotSpace.yRange], errMessage);
+    XCTAssertTrue([plotSpace.yRange isEqualToRange:newPlotSpace.yRange], @"%@", errMessage);
 
     errMessage = [NSString stringWithFormat:@"globalXRange was %@, expected %@", plotSpace.globalXRange, newPlotSpace.globalXRange];
-    STAssertTrue([plotSpace.globalXRange isEqualToRange:newPlotSpace.globalXRange], errMessage);
+    XCTAssertTrue([plotSpace.globalXRange isEqualToRange:newPlotSpace.globalXRange], @"%@", errMessage);
 
     errMessage = [NSString stringWithFormat:@"globalYRange was %@, expected %@", plotSpace.globalYRange, newPlotSpace.globalYRange];
-    STAssertTrue([plotSpace.globalYRange isEqualToRange:newPlotSpace.globalYRange], errMessage);
+    XCTAssertTrue([plotSpace.globalYRange isEqualToRange:newPlotSpace.globalYRange], @"%@", errMessage);
 
-    STAssertEquals(plotSpace.xScaleType, newPlotSpace.xScaleType, @"xScaleType not equal");
-    STAssertEquals(plotSpace.yScaleType, newPlotSpace.yScaleType, @"yScaleType not equal");
+    XCTAssertEqual(plotSpace.xScaleType, newPlotSpace.xScaleType, @"xScaleType not equal");
+    XCTAssertEqual(plotSpace.yScaleType, newPlotSpace.yScaleType, @"yScaleType not equal");
 }
 
 @end
