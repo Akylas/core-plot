@@ -36,6 +36,9 @@
  **/
 @synthesize rotation;
 
+@synthesize visible;
+
+
 #pragma mark -
 #pragma mark Init/Dealloc
 
@@ -61,6 +64,7 @@
         displacement        = CGPointZero;
         contentAnchorPoint  = CPTPointMake(0.5, 0.5);
         rotation            = CPTFloat(0.0);
+        visible            = YES;
     }
     return self;
 }
@@ -79,6 +83,7 @@
     [coder encodeCPTPoint:self.contentAnchorPoint forKey:@"CPTAnnotation.contentAnchorPoint"];
     [coder encodeCPTPoint:self.displacement forKey:@"CPTAnnotation.displacement"];
     [coder encodeCGFloat:self.rotation forKey:@"CPTAnnotation.rotation"];
+    [coder encodeCGFloat:self.visible forKey:@"CPTAnnotation.visible"];
 }
 
 -(instancetype)initWithCoder:(NSCoder *)coder
@@ -89,6 +94,7 @@
         contentAnchorPoint  = [coder decodeCPTPointForKey:@"CPTAnnotation.contentAnchorPoint"];
         displacement        = [coder decodeCPTPointForKey:@"CPTAnnotation.displacement"];
         rotation            = [coder decodeCGFloatForKey:@"CPTAnnotation.rotation"];
+        visible             = [coder decodeBoolForKey:@"CPTAnnotation.visible"];
     }
     return self;
 }
@@ -120,6 +126,7 @@
         if ( contentLayer ) {
             CPTAnnotationHostLayer *hostLayer = self.annotationHostLayer;
             [hostLayer addSublayer:contentLayer];
+            contentLayer.hidden = !self.visible;
         }
     }
 }
@@ -134,6 +141,15 @@
         if ( myContent ) {
             [newLayer addSublayer:myContent];
         }
+    }
+}
+
+-(void)setVisible:(BOOL)newValue
+{
+    visible = newValue;
+    if (self.contentLayer) {
+        self.contentLayer.hidden = !visible;
+        [[self.contentLayer superlayer] setNeedsLayout];
     }
 }
 

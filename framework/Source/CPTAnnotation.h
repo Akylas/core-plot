@@ -10,6 +10,7 @@
 @property (nonatomic, readwrite, assign) CGPoint contentAnchorPoint;
 @property (nonatomic, readwrite, assign) CGPoint displacement;
 @property (nonatomic, readwrite, assign) CGFloat rotation;
+@property (nonatomic, readwrite, assign) BOOL visible;
 
 @end
 
