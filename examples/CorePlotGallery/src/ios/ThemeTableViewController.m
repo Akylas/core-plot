@@ -5,7 +5,7 @@
 
 #import "ThemeTableViewController.h"
 
-#import "CorePlot-CocoaTouch.h"
+#import <CorePlot/CorePlot.h>
 
 NSString *const kThemeTableViewControllerNoTheme      = @"None";
 NSString *const kThemeTableViewControllerDefaultTheme = @"Default";
@@ -15,7 +15,7 @@ NSString *const PlotGalleryThemeNameKey               = @"PlotGalleryThemeNameKe
 
 @interface ThemeTableViewController()
 
-@property (nonatomic, readwrite, strong) NSMutableArray *themes;
+@property (nonatomic, readwrite, strong) CPTMutableStringArray themes;
 
 @end
 
@@ -27,7 +27,7 @@ NSString *const PlotGalleryThemeNameKey               = @"PlotGalleryThemeNameKe
 
 -(void)setupThemes
 {
-    NSMutableArray *themeList = [[NSMutableArray alloc] init];
+    CPTMutableStringArray themeList = [[NSMutableArray alloc] init];
 
     [themeList addObject:kThemeTableViewControllerDefaultTheme];
     [themeList addObject:kThemeTableViewControllerNoTheme];
@@ -44,7 +44,7 @@ NSString *const PlotGalleryThemeNameKey               = @"PlotGalleryThemeNameKe
     [self setupThemes];
 }
 
--(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+-(instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     if ( (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) ) {
         [self setupThemes];
@@ -86,7 +86,7 @@ NSString *const PlotGalleryThemeNameKey               = @"PlotGalleryThemeNameKe
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSDictionary *themeInfo = @{
+    NSDictionary<NSString *, NSString *> *themeInfo = @{
         PlotGalleryThemeNameKey: self.themes[(NSUInteger)indexPath.row]
     };
 

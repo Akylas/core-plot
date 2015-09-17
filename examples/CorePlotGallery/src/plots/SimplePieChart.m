@@ -7,24 +7,30 @@
 
 @interface SimplePieChart()
 
-@property (nonatomic, readwrite, strong) NSArray *plotData;
+@property (nonatomic, readwrite, strong) CPTNumberArray plotData;
+@property (nonatomic, readwrite) NSUInteger offsetIndex;
+@property (nonatomic, readwrite) CGFloat sliceOffset;
 
 @end
 
 @implementation SimplePieChart
 
 @synthesize plotData;
+@synthesize offsetIndex;
+@synthesize sliceOffset;
 
 +(void)load
 {
     [super registerPlotItem:self];
 }
 
--(id)init
+-(instancetype)init
 {
     if ( (self = [super init]) ) {
         self.title   = @"Simple Pie Chart";
         self.section = kPieCharts;
+
+        self.offsetIndex = NSNotFound;
     }
 
     return self;
@@ -127,8 +133,10 @@
 {
     NSLog(@"Slice was selected at index %d. Value = %f", (int)index, [self.plotData[index] floatValue]);
 
-    NSMutableArray *newData = [[NSMutableArray alloc] init];
-    NSUInteger dataCount    = (NSUInteger)lrint( ceil(10.0 * arc4random() / (double)UINT32_MAX) ) + 1;
+    self.offsetIndex = NSNotFound;
+
+    CPTMutableNumberArray newData = [[NSMutableArray alloc] init];
+    NSUInteger dataCount          = (NSUInteger)lrint( ceil(10.0 * arc4random() / (double)UINT32_MAX) ) + 1;
     for ( NSUInteger i = 1; i < dataCount; i++ ) {
         [newData addObject:@(100.0 * arc4random() / (double)UINT32_MAX)];
     }
@@ -145,6 +153,16 @@
 -(void)legend:(CPTLegend *)legend legendEntryForPlot:(CPTPlot *)plot wasSelectedAtIndex:(NSUInteger)idx
 {
     NSLog(@"Legend entry for '%@' was selected at index %lu.", plot.identifier, (unsigned long)idx);
+
+    [CPTAnimation animate:self
+                 property:@"sliceOffset"
+                     from:(idx == self.offsetIndex ? NAN : 0.0)
+                       to:(idx == self.offsetIndex ? 0.0 : 35.0)
+                 duration:0.5
+           animationCurve:CPTAnimationCurveCubicOut
+                 delegate:nil];
+
+    self.offsetIndex = idx;
 }
 
 #pragma mark -
@@ -180,19 +198,36 @@
 #endif
 
     NSMutableAttributedString *title = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"Pie Slice %lu", (unsigned long)index]];
-    if ( &NSForegroundColorAttributeName != NULL ) {
-        [title addAttribute:NSForegroundColorAttributeName
-                      value:sliceColor
-                      range:NSMakeRange(4, 5)];
-    }
+    [title addAttribute:NSForegroundColorAttributeName
+                  value:sliceColor
+                  range:NSMakeRange(4, 5)];
 
-    if ( &NSFontAttributeName != NULL ) {
-        [title addAttribute:NSFontAttributeName
-                      value:labelFont
-                      range:NSMakeRange(0, title.length)];
-    }
+    [title addAttribute:NSFontAttributeName
+                  value:labelFont
+                  range:NSMakeRange(0, title.length)];
 
     return title;
+}
+
+-(CGFloat)radialOffsetForPieChart:(CPTPieChart *)pieChart recordIndex:(NSUInteger)index
+{
+    return index == self.offsetIndex ? self.sliceOffset : 0.0;
+}
+
+#pragma mark -
+#pragma mark Accessors
+
+-(void)setSliceOffset:(CGFloat)newOffset
+{
+    if ( newOffset != sliceOffset ) {
+        sliceOffset = newOffset;
+
+        [self.graphs[0] reloadData];
+
+        if ( newOffset == 0.0 ) {
+            self.offsetIndex = NSNotFound;
+        }
+    }
 }
 
 @end

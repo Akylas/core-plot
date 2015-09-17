@@ -1,6 +1,8 @@
-#import <Foundation/Foundation.h>
+#import "NSDictionary+APFinancialData.h"
 
 @class APYahooDataPuller;
+
+typedef NSArray<CPTDictionary> *CPTFinancialDataArray;
 
 @protocol APYahooDataPullerDelegate
 
@@ -20,13 +22,13 @@
 @property (nonatomic, readwrite, copy) NSString *targetSymbol;
 @property (nonatomic, readwrite, strong) NSDate *targetStartDate;
 @property (nonatomic, readwrite, strong) NSDate *targetEndDate;
-@property (nonatomic, readonly, strong) NSArray *financialData;
+@property (nonatomic, readonly, strong) CPTFinancialDataArray financialData;
 @property (nonatomic, readonly, strong) NSDecimalNumber *overallHigh;
 @property (nonatomic, readonly, strong) NSDecimalNumber *overallLow;
 @property (nonatomic, readonly, assign) BOOL loadingData;
 @property (nonatomic, readonly, assign) BOOL staleData;
 
--(id)initWithTargetSymbol:(NSString *)aSymbol targetStartDate:(NSDate *)aStartDate targetEndDate:(NSDate *)anEndDate;
+-(instancetype)initWithTargetSymbol:(NSString *)aSymbol targetStartDate:(NSDate *)aStartDate targetEndDate:(NSDate *)anEndDate;
 -(void)fetchIfNeeded;
 -(void)cancelDownload;
 

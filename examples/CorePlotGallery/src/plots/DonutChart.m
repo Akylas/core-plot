@@ -5,7 +5,7 @@ static NSString *const outerChartName = @"Outer";
 
 @interface DonutChart()
 
-@property (nonatomic, readwrite, strong) NSArray *plotData;
+@property (nonatomic, readwrite, strong) CPTNumberArray plotData;
 
 @end
 
@@ -18,7 +18,7 @@ static NSString *const outerChartName = @"Outer";
     [super registerPlotItem:self];
 }
 
--(id)init
+-(instancetype)init
 {
     if ( (self = [super init]) ) {
         self.title   = @"Donut Chart";

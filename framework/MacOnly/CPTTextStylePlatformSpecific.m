@@ -6,7 +6,7 @@
 
 @implementation CPTTextStyle(CPTPlatformSpecificTextStyleExtensions)
 
-/** @property NSDictionary *attributes
+/** @property CPTDictionary attributes
  *  @brief A dictionary of standard text attributes suitable for formatting an NSAttributedString.
  *
  *  The dictionary will contain values for the following keys that represent the receiver's text style:
@@ -32,7 +32,7 @@
  *  @param attributes A dictionary of standard text attributes.
  *  @return A new CPTTextStyle instance.
  **/
-+(instancetype)textStyleWithAttributes:(NSDictionary *)attributes
++(instancetype)textStyleWithAttributes:(CPTDictionary)attributes
 {
     CPTMutableTextStyle *newStyle = [CPTMutableTextStyle textStyle];
 
@@ -82,12 +82,17 @@
 
 /// @cond
 
--(NSDictionary *)attributes
+-(CPTDictionary)attributes
 {
-    NSMutableDictionary *myAttributes = [NSMutableDictionary dictionary];
+    CPTMutableDictionary myAttributes = [NSMutableDictionary dictionary];
 
     // Font
-    NSFont *styleFont = [NSFont fontWithName:self.fontName size:self.fontSize];
+    NSFont *styleFont  = nil;
+    NSString *fontName = self.fontName;
+
+    if ( fontName ) {
+        styleFont = [NSFont fontWithName:fontName size:self.fontSize];
+    }
 
     if ( styleFont ) {
         [myAttributes setValue:styleFont
@@ -122,7 +127,7 @@
 
 /// @cond
 
-+(instancetype)textStyleWithAttributes:(NSDictionary *)attributes
++(instancetype)textStyleWithAttributes:(CPTDictionary)attributes
 {
     CPTMutableTextStyle *newStyle = [CPTMutableTextStyle textStyle];
 
@@ -184,12 +189,17 @@
  **/
 -(CGSize)sizeWithTextStyle:(CPTTextStyle *)style
 {
-    NSFont *theFont = [NSFont fontWithName:style.fontName size:style.fontSize];
+    NSFont *theFont    = nil;
+    NSString *fontName = style.fontName;
+
+    if ( fontName ) {
+        theFont = [NSFont fontWithName:fontName size:style.fontSize];
+    }
 
     CGSize textSize;
 
     if ( theFont ) {
-        NSDictionary *attributes = @{
+        CPTDictionary attributes = @{
             NSFontAttributeName: theFont
         };
 
@@ -222,14 +232,21 @@
     CGContextSetFillColorWithColor(context, textColor);
 
     CPTPushCGContext(context);
-    NSFont *theFont = [NSFont fontWithName:style.fontName size:style.fontSize];
+
+    NSFont *theFont    = nil;
+    NSString *fontName = style.fontName;
+
+    if ( fontName ) {
+        theFont = [NSFont fontWithName:fontName size:style.fontSize];
+    }
+
     if ( theFont ) {
         NSColor *foregroundColor                = style.color.nsColor;
         NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
         paragraphStyle.alignment     = (NSTextAlignment)style.textAlignment;
         paragraphStyle.lineBreakMode = style.lineBreakMode;
 
-        NSDictionary *attributes = @{
+        CPTDictionary attributes = @{
             NSFontAttributeName: theFont,
             NSForegroundColorAttributeName: foregroundColor,
             NSParagraphStyleAttributeName: paragraphStyle

@@ -9,7 +9,7 @@
 @property (nonatomic, readwrite, strong) NSDecimalNumber *overallLow;
 @property (nonatomic, readwrite, strong) NSDecimalNumber *overallVolumeHigh;
 @property (nonatomic, readwrite, strong) NSDecimalNumber *overallVolumeLow;
-@property (nonatomic, readwrite, strong) NSArray *financialData;
+@property (nonatomic, readwrite, strong) CPTFinancialDataArray financialData;
 
 @property (nonatomic, readwrite, assign) BOOL loadingData;
 @property (nonatomic, readwrite, strong) NSMutableData *receivedData;
@@ -64,9 +64,9 @@ NSTimeInterval timeIntervalForNumberOfWeeks(double numberOfWeeks)
     }
 }
 
--(NSDictionary *)plistRep
+-(CPTDictionary)plistRep
 {
-    NSMutableDictionary *rep = [NSMutableDictionary dictionaryWithCapacity:7];
+    CPTMutableDictionary rep = [NSMutableDictionary dictionaryWithCapacity:7];
 
     rep[@"symbol"]            = [self symbol];
     rep[@"startDate"]         = [self startDate];
@@ -75,7 +75,8 @@ NSTimeInterval timeIntervalForNumberOfWeeks(double numberOfWeeks)
     rep[@"overallLow"]        = [self overallLow];
     rep[@"overallVolumeHigh"] = [self overallVolumeHigh];
     rep[@"overallVolumeLow"]  = [self overallVolumeLow];
-    rep[@"financalData"]      = [self financialData];
+    rep[@"financialData"]     = [self financialData];
+
     return [NSDictionary dictionaryWithDictionary:rep];
 }
 
@@ -86,7 +87,7 @@ NSTimeInterval timeIntervalForNumberOfWeeks(double numberOfWeeks)
     return success;
 }
 
--(id)initWithDictionary:(NSDictionary *)aDict targetSymbol:(NSString *)aSymbol targetStartDate:(NSDate *)aStartDate targetEndDate:(NSDate *)anEndDate
+-(instancetype)initWithDictionary:(CPTDictionary)aDict targetSymbol:(NSString *)aSymbol targetStartDate:(NSDate *)aStartDate targetEndDate:(NSDate *)anEndDate
 {
     self = [super init];
     if ( self != nil ) {
@@ -95,7 +96,7 @@ NSTimeInterval timeIntervalForNumberOfWeeks(double numberOfWeeks)
         self.overallLow    = [NSDecimalNumber decimalNumberWithDecimal:[aDict[@"overallLow"] decimalValue]];
         self.overallHigh   = [NSDecimalNumber decimalNumberWithDecimal:[aDict[@"overallHigh"] decimalValue]];
         self.endDate       = aDict[@"endDate"];
-        self.financialData = aDict[@"financalData"];
+        self.financialData = aDict[@"financialData"];
 
         self.targetSymbol    = aSymbol;
         self.targetStartDate = aStartDate;
@@ -108,7 +109,7 @@ NSTimeInterval timeIntervalForNumberOfWeeks(double numberOfWeeks)
 
 -(NSString *)pathForSymbol:(NSString *)aSymbol
 {
-    NSArray *paths               = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    CPTStringArray paths         = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = paths[0];
     NSString *docPath            = [documentsDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.plist", aSymbol]];
 
@@ -127,33 +128,35 @@ NSTimeInterval timeIntervalForNumberOfWeeks(double numberOfWeeks)
 }
 
 //Always returns *something*
--(NSDictionary *)dictionaryForSymbol:(NSString *)aSymbol
+-(CPTDictionary)dictionaryForSymbol:(NSString *)aSymbol
 {
-    NSString *path                      = [self faultTolerantPathForSymbol:aSymbol];
-    NSMutableDictionary *localPlistDict = [NSMutableDictionary dictionaryWithContentsOfFile:path];
+    NSString *path = [self faultTolerantPathForSymbol:aSymbol];
+
+    CPTMutableDictionary localPlistDict = [NSMutableDictionary dictionaryWithContentsOfFile:path];
 
     return localPlistDict;
 }
 
--(id)initWithTargetSymbol:(NSString *)aSymbol targetStartDate:(NSDate *)aStartDate targetEndDate:(NSDate *)anEndDate
+-(instancetype)initWithTargetSymbol:(NSString *)aSymbol targetStartDate:(NSDate *)aStartDate targetEndDate:(NSDate *)anEndDate
 {
-    NSDictionary *cachedDictionary = [self dictionaryForSymbol:aSymbol];
+    CPTDictionary cachedDictionary = [self dictionaryForSymbol:aSymbol];
 
     if ( nil != cachedDictionary ) {
         return [self initWithDictionary:cachedDictionary targetSymbol:aSymbol targetStartDate:aStartDate targetEndDate:anEndDate];
     }
 
-    NSMutableDictionary *rep = [NSMutableDictionary dictionaryWithCapacity:7];
-    rep[@"symbol"]       = aSymbol;
-    rep[@"startDate"]    = aStartDate;
-    rep[@"endDate"]      = anEndDate;
-    rep[@"overallHigh"]  = [NSDecimalNumber notANumber];
-    rep[@"overallLow"]   = [NSDecimalNumber notANumber];
-    rep[@"financalData"] = @[];
+    CPTMutableDictionary rep = [NSMutableDictionary dictionaryWithCapacity:7];
+    rep[@"symbol"]        = aSymbol;
+    rep[@"startDate"]     = aStartDate;
+    rep[@"endDate"]       = anEndDate;
+    rep[@"overallHigh"]   = [NSDecimalNumber notANumber];
+    rep[@"overallLow"]    = [NSDecimalNumber notANumber];
+    rep[@"financialData"] = @[];
+
     return [self initWithDictionary:rep targetSymbol:aSymbol targetStartDate:aStartDate targetEndDate:anEndDate];
 }
 
--(id)init
+-(instancetype)init
 {
     NSTimeInterval secondsAgo = -timeIntervalForNumberOfWeeks(14.0); //12 weeks ago
     NSDate *start             = [NSDate dateWithTimeIntervalSinceNow:secondsAgo];
@@ -289,10 +292,27 @@ NSTimeInterval timeIntervalForNumberOfWeeks(double numberOfWeeks)
     [self parseCSVAndPopulate];
 
     //see if we need to write to file
-    NSDictionary *dictionaryForSymbol = [self dictionaryForSymbol:self.symbol];
-    if ( ![[self symbol] isEqualToString:dictionaryForSymbol[@"symbol"]] ||
-         ([[self startDate] compare:dictionaryForSymbol[@"startDate"]] != NSOrderedSame) ||
-         ([[self endDate] compare:dictionaryForSymbol[@"endDate"]] != NSOrderedSame) ) {
+    CPTDictionary dictionaryForSymbol = [self dictionaryForSymbol:self.symbol];
+
+    BOOL sameSymbol      = NO;
+    NSString *dictSymbol = dictionaryForSymbol[@"symbol"];
+    if ( dictSymbol ) {
+        sameSymbol = [[self symbol] isEqualToString:dictSymbol];
+    }
+
+    BOOL sameStart    = NO;
+    NSDate *dictStart = dictionaryForSymbol[@"startDate"];
+    if ( dictStart ) {
+        sameStart = ([[self startDate] compare:dictStart] != NSOrderedSame);
+    }
+
+    BOOL sameEnd    = NO;
+    NSDate *dictEnd = dictionaryForSymbol[@"endDate"];
+    if ( dictEnd ) {
+        sameEnd = ([[self startDate] compare:dictEnd] != NSOrderedSame);
+    }
+
+    if ( !sameSymbol || !sameStart || !sameEnd ) {
         [self writeToFile:[self pathForSymbol:self.symbol] atomically:YES];
     }
     else {
@@ -302,10 +322,11 @@ NSTimeInterval timeIntervalForNumberOfWeeks(double numberOfWeeks)
 
 -(void)parseCSVAndPopulate
 {
-    NSArray *csvLines              = [self.csvString componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-    NSMutableArray *newFinancials  = [NSMutableArray arrayWithCapacity:[csvLines count]];
-    NSDictionary *currentFinancial = nil;
-    NSString *line                 = nil;
+    CPTStringArray csvLines = [self.csvString componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+
+    NSMutableArray<NSDictionary *> *newFinancials = [NSMutableArray arrayWithCapacity:[csvLines count]];
+    CPTDictionary currentFinancial                = nil;
+    NSString *line                                = nil;
 
     self.overallHigh       = [NSDecimalNumber notANumber];
     self.overallLow        = [NSDecimalNumber notANumber];
@@ -313,7 +334,7 @@ NSTimeInterval timeIntervalForNumberOfWeeks(double numberOfWeeks)
     self.overallVolumeLow  = [NSDecimalNumber notANumber];
 
     for ( NSUInteger i = 1; i < [csvLines count] - 1; i++ ) {
-        line             = (NSString *)csvLines[i];
+        line             = csvLines[i];
         currentFinancial = [NSDictionary dictionaryWithCSVLine:line];
         [newFinancials addObject:currentFinancial];
 

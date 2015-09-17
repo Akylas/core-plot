@@ -15,7 +15,11 @@
     const size_t height           = 50;
     const size_t bitsPerComponent = 8;
 
+#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+#else
     CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
+#endif
 
     self.context = CGBitmapContextCreate(NULL,
                                          width,
@@ -572,6 +576,28 @@
     XCTAssertEqual(alignedRect.origin.y, CPTFloat(16.0), @"round y (19.6364, 16.00001, 20.2727, 0.0)");
     XCTAssertEqual(alignedRect.size.width, CPTFloat(20.0), @"round width (19.6364, 16.00001, 20.2727, 0.0)");
     XCTAssertEqual(alignedRect.size.height, CPTFloat(0.0), @"round height (19.6364, 16.00001, 20.2727, 0.0)");
+}
+
+-(void)testLogModulus
+{
+    XCTAssertEqual(CPTLogModulus(0.0), 0.0, @"CPTLogModulus(0.0)");
+
+    XCTAssertEqual(CPTLogModulus(10.0), log10(11.0), @"CPTLogModulus(10.0)");
+    XCTAssertEqual(CPTLogModulus(-10.0), -log10(11.0), @"CPTLogModulus(-10.0)");
+
+    XCTAssertEqual(CPTLogModulus(100.0), log10(101.0), @"CPTLogModulus(100.0)");
+    XCTAssertEqual(CPTLogModulus(-100.0), -log10(101.0), @"CPTLogModulus(-100.0)");
+}
+
+-(void)testInverseLogModulus
+{
+    XCTAssertEqual(CPTInverseLogModulus(0.0), 0.0, @"CPTInverseLogModulus(0.0)");
+
+    XCTAssertEqualWithAccuracy(CPTInverseLogModulus( log10(11.0) ), 10.0, 1.0e-7, @"CPTInverseLogModulus(log10(11.0))");
+    XCTAssertEqualWithAccuracy(CPTInverseLogModulus( -log10(11.0) ), -10.0, 1.0e-7, @"CPTInverseLogModulus(-log10(11.0))");
+
+    XCTAssertEqualWithAccuracy(CPTInverseLogModulus( log10(101.0) ), 100.0, 1.0e-7, @"CPTInverseLogModulus(log10(101.0))");
+    XCTAssertEqualWithAccuracy(CPTInverseLogModulus( -log10(101.0) ), -100.0, 1.0e-7, @"CPTInverseLogModulus(-log10(101.0))");
 }
 
 @end
