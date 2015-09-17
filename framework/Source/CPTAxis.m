@@ -1396,9 +1396,7 @@ NSDecimal niceLength(NSDecimal length)
     CPTShadow *theShadow;
     
     id<CPTAxisDelegate> theDelegate = self.delegate;
-
-    id<CPTAxisDelegate> theDelegate = self.delegate;
-
+    
     if ( useMajorAxisLabels ) {
         if ( [theDelegate respondsToSelector:@selector(axis:shouldUpdateAxisLabelsAtLocations:)] ) {
             BOOL shouldContinue = [theDelegate axis:self shouldUpdateAxisLabelsAtLocations:locations];
