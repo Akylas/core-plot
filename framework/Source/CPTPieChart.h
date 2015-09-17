@@ -73,7 +73,7 @@ typedef NS_ENUM (NSInteger, CPTPieDirection) {
  *  @param indexRange The range of the data indexes of interest.
  *  @return The pie slice border style for the slice with the given index.
  **/
--(NSArray *)sliceBordersForPieChart:(CPTPieChart *)pieChart recordIndexRange:(NSRange)indexRange;
+-(nullable NSArray *)sliceBordersForPieChart:(nullable CPTPieChart *)pieChart recordIndexRange:(NSRange)indexRange;
 
 /** @brief @optional Gets a border style for the given pie chart slice.
  *  This method will not be called if
@@ -83,7 +83,7 @@ typedef NS_ENUM (NSInteger, CPTPieDirection) {
  *  @param idx The data index of interest.
  *  @return The pie slice border style for the slice with the given index.
  **/
--(CPTLineStyle *)sliceBorderForPieChart:(CPTPieChart *)pieChart recordIndex:(NSUInteger)idx;
+-(nullable CPTLineStyle *)sliceBorderForPieChart:(nullable CPTPieChart *)pieChart recordIndex:(NSUInteger)idx;
 
 /// @}
 
