@@ -525,17 +525,17 @@ static const CGFloat colorLookupTable[10][3] =
     
     id<CPTPieChartDataSource> theDataSource = (id<CPTPieChartDataSource>)self.dataSource;
     
-    BOOL needsLegendUpdate = NO;
+//    BOOL needsLegendUpdate = NO;
     
     if ( [theDataSource respondsToSelector:@selector(sliceBordersForPieChart:recordIndexRange:)] ) {
-        needsLegendUpdate = YES;
+//        needsLegendUpdate = YES;
         
         [self cacheArray:[theDataSource sliceBordersForPieChart:self recordIndexRange:indexRange]
                   forKey:CPTPieChartBindingPieSliceBorders
            atRecordIndex:indexRange.location];
     }
     else if ( [theDataSource respondsToSelector:@selector(sliceBorderForPieChart:recordIndex:)] ) {
-        needsLegendUpdate = YES;
+//        needsLegendUpdate = YES;
         
         id nilObject          = [CPTPlot nilData];
         NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:indexRange.length];
