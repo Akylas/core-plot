@@ -1,14 +1,14 @@
 //
-//  GradientScatterPlot.m
-//  CorePlotGallery
+// GradientScatterPlot.m
+// CorePlotGallery
 //
 
 #import "GradientScatterPlot.h"
 
 @interface GradientScatterPlot()
 
-@property (nonatomic, readwrite, strong) CPTPlotSpaceAnnotation *symbolTextAnnotation;
-@property (nonatomic, readwrite, strong) NSArray<NSDictionary *> *plotData;
+@property (nonatomic, readwrite, strong, nullable) CPTPlotSpaceAnnotation *symbolTextAnnotation;
+@property (nonatomic, readwrite, strong, nonnull) NSArray<NSDictionary *> *plotData;
 
 @end
 
@@ -22,7 +22,7 @@
     [super registerPlotItem:self];
 }
 
--(instancetype)init
+-(nonnull instancetype)init
 {
     if ( (self = [super init]) ) {
         self.title   = @"Gradient Scatter Plot";
@@ -34,7 +34,7 @@
 
 -(void)killGraph
 {
-    if ( [self.graphs count] ) {
+    if ( self.graphs.count ) {
         CPTGraph *graph = (self.graphs)[0];
 
         CPTPlotSpaceAnnotation *annotation = self.symbolTextAnnotation;
@@ -61,9 +61,9 @@
     }
 }
 
--(void)renderInGraphHostingView:(CPTGraphHostingView *)hostingView withTheme:(CPTTheme *)theme animated:(BOOL)animated
+-(void)renderInGraphHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme animated:(BOOL)animated
 {
-#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+#if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
     CGRect bounds = hostingView.bounds;
 #else
     CGRect bounds = NSRectToCGRect(hostingView.bounds);
@@ -190,18 +190,18 @@
 #pragma mark -
 #pragma mark Plot Data Source Methods
 
--(NSUInteger)numberOfRecordsForPlot:(CPTPlot *)plot
+-(NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot
 {
     return self.plotData.count;
 }
 
--(id)numberForPlot:(CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
+-(nullable id)numberForPlot:(nonnull CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
 {
     NSString *key = (fieldEnum == CPTScatterPlotFieldX ? @"x" : @"y");
     NSNumber *num = self.plotData[index][key];
 
     if ( fieldEnum == CPTScatterPlotFieldY ) {
-        num = @([num doubleValue]);
+        num = @(num.doubleValue);
     }
 
     return num;
@@ -210,7 +210,7 @@
 #pragma mark -
 #pragma mark Plot Space Delegate Methods
 
--(CPTPlotRange *)plotSpace:(CPTPlotSpace *)space willChangePlotRangeTo:(CPTPlotRange *)newRange forCoordinate:(CPTCoordinate)coordinate
+-(nullable CPTPlotRange *)plotSpace:(nonnull CPTPlotSpace *)space willChangePlotRangeTo:(nonnull CPTPlotRange *)newRange forCoordinate:(CPTCoordinate)coordinate
 {
     // Impose a limit on how far user can scroll in x
     if ( coordinate == CPTCoordinateX ) {
@@ -226,7 +226,7 @@
 #pragma mark -
 #pragma mark CPTScatterPlot delegate method
 
--(void)scatterPlot:(CPTScatterPlot *)plot plotSymbolWasSelectedAtRecordIndex:(NSUInteger)index
+-(void)scatterPlot:(nonnull CPTScatterPlot *)plot plotSymbolWasSelectedAtRecordIndex:(NSUInteger)index
 {
     CPTGraph *graph = (self.graphs)[0];
 
@@ -249,12 +249,12 @@
     NSNumber *x = dataPoint[@"x"];
     NSNumber *y = dataPoint[@"y"];
 
-    CPTNumberArray anchorPoint = @[x, y];
+    CPTNumberArray *anchorPoint = @[x, y];
 
     // Add annotation
     // First make a string for the y value
     NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-    [formatter setMaximumFractionDigits:2];
+    formatter.maximumFractionDigits = 2;
     NSString *yString = [formatter stringFromNumber:y];
 
     // Now add the annotation to the plot area
@@ -272,13 +272,13 @@
 #pragma mark -
 #pragma mark Plot area delegate method
 
--(void)plotAreaWasSelected:(CPTPlotArea *)plotArea
+-(void)plotAreaWasSelected:(nonnull CPTPlotArea *)plotArea
 {
     // Remove the annotation
     CPTPlotSpaceAnnotation *annotation = self.symbolTextAnnotation;
 
     if ( annotation ) {
-        CPTXYGraph *graph = [self.graphs objectAtIndex:0];
+        CPTXYGraph *graph = (self.graphs)[0];
 
         [graph.plotAreaFrame.plotArea removeAnnotation:annotation];
         self.symbolTextAnnotation = nil;

@@ -11,12 +11,12 @@
  **/
 @implementation CPTAnnotation
 
-/** @property CPTLayer *contentLayer
+/** @property nullable CPTLayer *contentLayer
  *  @brief The annotation content.
  **/
 @synthesize contentLayer;
 
-/** @property cpt_weak CPTAnnotationHostLayer *annotationHostLayer
+/** @property nullable CPTAnnotationHostLayer *annotationHostLayer
  *  @brief The host layer for the annotation content.
  **/
 @synthesize annotationHostLayer;
@@ -56,7 +56,7 @@
  *
  *  @return The initialized object.
  **/
--(instancetype)init
+-(nonnull instancetype)init
 {
     if ( (self = [super init]) ) {
         annotationHostLayer = nil;
@@ -76,7 +76,7 @@
 
 /// @cond
 
--(void)encodeWithCoder:(NSCoder *)coder
+-(void)encodeWithCoder:(nonnull NSCoder *)coder
 {
     [coder encodeConditionalObject:self.annotationHostLayer forKey:@"CPTAnnotation.annotationHostLayer"];
     [coder encodeObject:self.contentLayer forKey:@"CPTAnnotation.contentLayer"];
@@ -86,17 +86,31 @@
     [coder encodeCGFloat:self.visible forKey:@"CPTAnnotation.visible"];
 }
 
--(instancetype)initWithCoder:(NSCoder *)coder
+-(nullable instancetype)initWithCoder:(nonnull NSCoder *)coder
 {
     if ( (self = [super init]) ) {
-        annotationHostLayer = [coder decodeObjectForKey:@"CPTAnnotation.annotationHostLayer"];
-        contentLayer        = [coder decodeObjectForKey:@"CPTAnnotation.contentLayer"];
-        contentAnchorPoint  = [coder decodeCPTPointForKey:@"CPTAnnotation.contentAnchorPoint"];
-        displacement        = [coder decodeCPTPointForKey:@"CPTAnnotation.displacement"];
-        rotation            = [coder decodeCGFloatForKey:@"CPTAnnotation.rotation"];
-        visible             = [coder decodeBoolForKey:@"CPTAnnotation.visible"];
+        annotationHostLayer = [coder decodeObjectOfClass:[CPTAnnotationHostLayer class]
+                                                  forKey:@"CPTAnnotation.annotationHostLayer"];
+        contentLayer = [coder decodeObjectOfClass:[CPTLayer class]
+                                           forKey:@"CPTAnnotation.contentLayer"];
+        contentAnchorPoint = [coder decodeCPTPointForKey:@"CPTAnnotation.contentAnchorPoint"];
+        displacement       = [coder decodeCPTPointForKey:@"CPTAnnotation.displacement"];
+        rotation           = [coder decodeCGFloatForKey:@"CPTAnnotation.rotation"];
+        visible            = [coder decodeBoolForKey:@"CPTAnnotation.visible"];
     }
     return self;
+}
+
+/// @endcond
+
+#pragma mark -
+#pragma mark NSSecureCoding Methods
+
+/// @cond
+
++(BOOL)supportsSecureCoding
+{
+    return YES;
 }
 
 /// @endcond
@@ -106,9 +120,9 @@
 
 /// @cond
 
--(NSString *)description
+-(nullable NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ {%@}>", [super description], self.contentLayer];
+    return [NSString stringWithFormat:@"<%@ {%@}>", super.description, self.contentLayer];
 }
 
 /// @endcond
@@ -118,20 +132,22 @@
 
 /// @cond
 
--(void)setContentLayer:(CPTLayer *)newLayer
+-(void)setContentLayer:(nullable CPTLayer *)newLayer
 {
     if ( newLayer != contentLayer ) {
         [contentLayer removeFromSuperlayer];
         contentLayer = newLayer;
         if ( newLayer ) {
+            CPTLayer *layer = newLayer;
+
             CPTAnnotationHostLayer *hostLayer = self.annotationHostLayer;
-            [hostLayer addSublayer: newLayer];
+            [hostLayer addSublayer:layer];
             contentLayer.hidden = !self.visible;
         }
     }
 }
 
--(void)setAnnotationHostLayer:(CPTAnnotationHostLayer *)newLayer
+-(void)setAnnotationHostLayer:(nullable CPTAnnotationHostLayer *)newLayer
 {
     if ( newLayer != annotationHostLayer ) {
         CPTLayer *myContent = self.contentLayer;
@@ -157,7 +173,7 @@
 {
     if ( !CGPointEqualToPoint(newDisplacement, displacement) ) {
         displacement = newDisplacement;
-        [[self.contentLayer superlayer] setNeedsLayout];
+        [self.contentLayer.superlayer setNeedsLayout];
     }
 }
 
@@ -165,7 +181,7 @@
 {
     if ( !CGPointEqualToPoint(newAnchorPoint, contentAnchorPoint) ) {
         contentAnchorPoint = newAnchorPoint;
-        [[self.contentLayer superlayer] setNeedsLayout];
+        [self.contentLayer.superlayer setNeedsLayout];
     }
 }
 
@@ -173,7 +189,7 @@
 {
     if ( newRotation != rotation ) {
         rotation = newRotation;
-        [[self.contentLayer superlayer] setNeedsLayout];
+        [self.contentLayer.superlayer setNeedsLayout];
     }
 }
 

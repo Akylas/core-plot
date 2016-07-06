@@ -1,6 +1,6 @@
 //
-//  LabelingPolicyDemo.m
-//  Plot Gallery
+// LabelingPolicyDemo.m
+// Plot Gallery
 //
 
 #import "LabelingPolicyDemo.h"
@@ -12,7 +12,7 @@
     [super registerPlotItem:self];
 }
 
--(instancetype)init
+-(nonnull instancetype)init
 {
     if ( (self = [super init]) ) {
         self.title   = @"Axis Labeling Policies";
@@ -22,7 +22,7 @@
     return self;
 }
 
--(void)renderInGraphHostingView:(CPTGraphHostingView *)hostingView withTheme:(CPTTheme *)theme animated:(BOOL)animated
+-(void)renderInGraphHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme animated:(BOOL)animated
 {
     const CGFloat majorTickLength = 12.0;
     const CGFloat minorTickLength = 8.0;
@@ -70,9 +70,9 @@
     axisTitleTextStyle.fontName = @"Helvetica-Bold";
 
     // Tick locations
-    CPTNumberSet majorTickLocations = [NSSet setWithObjects:@0, @30, @50, @85, @100, nil];
+    CPTNumberSet *majorTickLocations = [NSSet setWithObjects:@0, @30, @50, @85, @100, nil];
 
-    CPTMutableNumberSet minorTickLocations = [NSMutableSet set];
+    CPTMutableNumberSet *minorTickLocations = [NSMutableSet set];
     for ( NSUInteger loc = 0; loc <= 100; loc += 10 ) {
         [minorTickLocations addObject:@(loc)];
     }
@@ -95,7 +95,7 @@
     axisNone.majorTickLocations = majorTickLocations;
     axisNone.minorTickLocations = minorTickLocations;
 
-    CPTMutableAxisLabelSet newAxisLabels = [NSMutableSet set];
+    CPTMutableAxisLabelSet *newAxisLabels = [NSMutableSet set];
     for ( NSUInteger i = 0; i <= 5; i++ ) {
         CPTAxisLabel *newLabel = [[CPTAxisLabel alloc] initWithText:[NSString stringWithFormat:@"Label %lu", (unsigned long)i]
                                                           textStyle:axisNone.labelTextStyle];

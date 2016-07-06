@@ -27,7 +27,7 @@
  */
 @dynamic inputBaseValue, inputBarOffset, inputBarWidth, inputHorizontalBars;
 
-+(NSDictionary<NSString *, NSString *> *)attributes
++(nonnull NSDictionary<NSString *, NSString *> *)attributes
 {
     return @{
                QCPlugInAttributeNameKey: @"Core Plot Bar Chart",
@@ -35,7 +35,7 @@
     };
 }
 
-+(CPTDictionary)attributesForPropertyPortWithKey:(NSString *)key
++(nonnull CPTDictionary *)attributesForPropertyPortWithKey:(nonnull NSString *)key
 {
     // A few additional ports for the bar plot chart type ...
 
@@ -153,7 +153,7 @@
         [self removeInputPortForKey:[NSString stringWithFormat:@"plotFillColor%lu", (unsigned long)(i - 1)]];
         [self removeInputPortForKey:[NSString stringWithFormat:@"plotDataLineWidth%lu", (unsigned long)(i - 1)]];
 
-        [theGraph removePlot:[[theGraph allPlots] lastObject]];
+        [theGraph removePlot:[theGraph allPlots].lastObject];
     }
 }
 
@@ -162,7 +162,7 @@
     CPTGraph *theGraph = self.graph;
 
     // The pixel width of a single plot unit (1..2) along the x axis of the plot
-    double count     = (double)[[theGraph allPlots] count];
+    double count     = (double)[theGraph allPlots].count;
     double unitWidth = theGraph.plotAreaFrame.bounds.size.width / (self.inputXMax - self.inputXMin);
     double barWidth  = self.inputBarWidth * unitWidth / count;
 
@@ -177,7 +177,7 @@
         plot.barWidth          = @(barWidth);
         plot.barOffset         = @(self.inputBarOffset);
         plot.barsAreHorizontal = self.inputHorizontalBars;
-        plot.fill              = [CPTFill fillWithColor:[CPTColor colorWithCGColor:(CGColorRef)[self areaFillColor : index]]];
+        plot.fill              = [CPTFill fillWithColor:[CPTColor colorWithCGColor:[self areaFillColor:index]]];
 
         [plot reloadData];
     }
@@ -188,7 +188,7 @@
 #pragma mark -
 #pragma mark Data source methods
 
--(NSUInteger)numberOfRecordsForPlot:(CPTPlot *)plot
+-(NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot
 {
     NSUInteger plotIndex = [[self.graph allPlots] indexOfObject:plot];
     NSString *key        = [NSString stringWithFormat:@"plotNumbers%lu", (unsigned long)plotIndex];
@@ -196,28 +196,28 @@
     return [[self valueForInputKey:key] count];
 }
 
--(NSArray *)numbersForPlot:(CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndexRange:(NSRange)indexRange
+-(nullable NSArray *)numbersForPlot:(nonnull CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndexRange:(NSRange)indexRange
 {
     NSUInteger plotIndex = [[self.graph allPlots] indexOfObject:plot];
     NSString *key        = [NSString stringWithFormat:@"plotNumbers%lu", (unsigned long)plotIndex];
 
-    CPTDictionary dict = [self valueForInputKey:key];
+    CPTDictionary *dict = [self valueForInputKey:key];
 
     if ( !dict ) {
         return nil;
     }
 
-    NSUInteger keyCount         = [[dict allKeys] count];
-    CPTMutableNumberArray array = [NSMutableArray array];
+    NSUInteger keyCount          = dict.allKeys.count;
+    CPTMutableNumberArray *array = [NSMutableArray array];
 
     if ( fieldEnum == CPTBarPlotFieldBarLocation ) {
         // Calculate horizontal position of bar - nth bar index + barWidth*plotIndex + 0.5
         float xpos;
-        float plotCount = [[self.graph allPlots] count];
+        float plotCount = [self.graph allPlots].count;
 
         for ( NSUInteger i = 0; i < keyCount; i++ ) {
             xpos = (float)i + (float)plotIndex / (plotCount);
-            [array addObject:[NSDecimalNumber decimalNumberWithString:[NSString stringWithFormat:@"%f", xpos]]];
+            [array addObject:[NSDecimalNumber decimalNumberWithString:[NSString stringWithFormat:@"%f", (double)xpos]]];
         }
     }
     else {

@@ -12,7 +12,7 @@ static dispatch_once_t queueOnceToken = 0;
 /** @brief Pushes the current AppKit graphics context onto a stack and replaces it with the given Core Graphics context.
  *  @param newContext The graphics context.
  **/
-void CPTPushCGContext(CGContextRef newContext)
+void CPTPushCGContext(__nonnull CGContextRef newContext)
 {
     dispatch_once(&contextOnceToken, ^{
         pushedContexts = [[NSMutableArray alloc] init];
@@ -24,12 +24,15 @@ void CPTPushCGContext(CGContextRef newContext)
     dispatch_sync(contextQueue, ^{
         NSGraphicsContext *currentContext = [NSGraphicsContext currentContext];
 
-        if ( newContext && currentContext ) {
+        if ( currentContext ) {
             [pushedContexts addObject:currentContext];
-            [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithGraphicsPort:newContext flipped:NO]];
         }
         else {
             [pushedContexts addObject:(NSGraphicsContext *)[NSNull null]];
+        }
+
+        if ( newContext ) {
+            [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithGraphicsPort:newContext flipped:NO]];
         }
     });
 }
@@ -53,6 +56,10 @@ void CPTPopCGContext(void)
             if ( [lastContext isKindOfClass:[NSGraphicsContext class]] ) {
                 [NSGraphicsContext setCurrentContext:lastContext];
             }
+            else {
+                [NSGraphicsContext setCurrentContext:nil];
+            }
+
             [pushedContexts removeLastObject];
         }
     });
@@ -68,7 +75,7 @@ void CPTPopCGContext(void)
  *  @param nsColor The NSColor.
  *  @return The @ref CGColorRef.
  **/
-CGColorRef CPTCreateCGColorFromNSColor(NSColor *nsColor)
+__nonnull CGColorRef CPTCreateCGColorFromNSColor(NSColor *__nonnull nsColor)
 {
     NSColor *rgbColor = [nsColor colorUsingColorSpace:[NSColorSpace genericRGBColorSpace]];
     CGFloat r, g, b, a;
@@ -84,7 +91,7 @@ CGColorRef CPTCreateCGColorFromNSColor(NSColor *nsColor)
  *  @param nsColor The NSColor.
  *  @return The CPTRGBAColor.
  **/
-CPTRGBAColor CPTRGBAColorFromNSColor(NSColor *nsColor)
+CPTRGBAColor CPTRGBAColorFromNSColor(NSColor *__nonnull nsColor)
 {
     CGFloat red, green, blue, alpha;
 
@@ -118,7 +125,7 @@ CPTNativeImage * __nonnull CPTQuickLookImage(CGRect rect, __nonnull CPTQuickLook
 
     NSGraphicsContext *bitmapContext = [NSGraphicsContext graphicsContextWithBitmapImageRep:layerImage];
 
-    CGContextRef context = (CGContextRef)[bitmapContext graphicsPort];
+    CGContextRef context = (CGContextRef)bitmapContext.graphicsPort;
 
     CGContextClearRect(context, rect);
 

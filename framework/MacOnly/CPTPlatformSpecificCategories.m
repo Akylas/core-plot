@@ -1,5 +1,7 @@
 #import "CPTPlatformSpecificCategories.h"
 
+#import "CPTGraph.h"
+#import "CPTGraphHostingView.h"
 #import "CPTPlatformSpecificFunctions.h"
 
 #pragma mark CPTLayer
@@ -9,23 +11,46 @@
 /** @brief Gets an image of the layer contents.
  *  @return A native image representation of the layer content.
  **/
--(CPTNativeImage *)imageOfLayer
+-(nonnull CPTNativeImage *)imageOfLayer
 {
     CGSize boundsSize = self.bounds.size;
 
-    NSBitmapImageRep *layerImage = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL
-                                                                           pixelsWide:(NSInteger)boundsSize.width
-                                                                           pixelsHigh:(NSInteger)boundsSize.height
-                                                                        bitsPerSample:8
-                                                                      samplesPerPixel:4
-                                                                             hasAlpha:YES
-                                                                             isPlanar:NO
-                                                                       colorSpaceName:NSCalibratedRGBColorSpace
-                                                                          bytesPerRow:(NSInteger)boundsSize.width * 4
-                                                                         bitsPerPixel:32];
+    // Figure out the scale of pixels to points
+    CGFloat scale = 0.0;
+
+    if ( [self respondsToSelector:@selector(hostingView)] ) {
+        scale = ( (CPTGraph *)self ).hostingView.window.backingScaleFactor;
+    }
+    else {
+        NSWindow *myWindow = self.graph.hostingView.window;
+
+        if ( myWindow ) {
+            scale = myWindow.backingScaleFactor;
+        }
+        else {
+            scale = [NSScreen mainScreen].backingScaleFactor;
+        }
+    }
+
+    NSBitmapImageRep *layerImage = [[NSBitmapImageRep alloc]
+                                    initWithBitmapDataPlanes:NULL
+                                                  pixelsWide:(NSInteger)(boundsSize.width * scale)
+                                                  pixelsHigh:(NSInteger)(boundsSize.height * scale)
+                                               bitsPerSample:8
+                                             samplesPerPixel:4
+                                                    hasAlpha:YES
+                                                    isPlanar:NO
+                                              colorSpaceName:NSCalibratedRGBColorSpace
+                                                bitmapFormat:NSAlphaFirstBitmapFormat
+                                                 bytesPerRow:0
+                                                bitsPerPixel:0
+                                   ];
+
+    // Setting the size communicates the dpi; enables proper scaling for Retina screens
+    layerImage.size = NSSizeFromCGSize(boundsSize);
 
     NSGraphicsContext *bitmapContext = [NSGraphicsContext graphicsContextWithBitmapImageRep:layerImage];
-    CGContextRef context             = (CGContextRef)[bitmapContext graphicsPort];
+    CGContextRef context             = (CGContextRef)bitmapContext.graphicsPort;
 
     CGContextClearRect( context, CPTRectMake(0.0, 0.0, boundsSize.width, boundsSize.height) );
     CGContextSetAllowsAntialiasing(context, true);
@@ -50,7 +75,7 @@
  **/
 @dynamic nsColor;
 
--(NSColor *)nsColor
+-(nonnull NSColor *)nsColor
 {
     return [NSColor colorWithCIColor:[CIColor colorWithCGColor:self.cgColor]];
 }
@@ -65,7 +90,7 @@
  *  @param rect The bounding rectangle in which to draw the text.
  *  @param context The graphics context to draw into.
  **/
--(void)drawInRect:(CGRect)rect inContext:(CGContextRef)context
+-(void)drawInRect:(CGRect)rect inContext:(nonnull CGContextRef)context
 {
     CPTPushCGContext(context);
 

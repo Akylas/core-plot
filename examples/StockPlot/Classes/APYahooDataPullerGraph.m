@@ -1,9 +1,9 @@
 //
-//  APYahooDataPullerGraph.m
-//  StockPlot
+// APYahooDataPullerGraph.m
+// StockPlot
 //
-//  Created by Jonathan Saggau on 6/19/09.
-//  Copyright 2009 __MyCompanyName__. All rights reserved.
+// Created by Jonathan Saggau on 6/19/09.
+// Copyright 2009 __MyCompanyName__. All rights reserved.
 //
 
 #import "APYahooDataPullerGraph.h"
@@ -56,7 +56,7 @@
     NSDecimalNumber *low    = self.dataPuller.overallLow;
     NSDecimalNumber *length = [high decimalNumberBySubtracting:low];
 
-    //NSLog(@"high = %@, low = %@, length = %@", high, low, length);
+    // NSLog(@"high = %@, low = %@, length = %@", high, low, length);
     plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:@0.0 length:@(self.dataPuller.financialData.count)];
     plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:low length:length];
     // Axes
@@ -78,7 +78,7 @@
 
     [theGraph reloadData];
 
-    [[self navigationItem] setTitle:[self.dataPuller symbol]];
+    self.navigationItem.title = self.dataPuller.symbol;
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -95,12 +95,12 @@
 
 -(void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
-    //    NSLog(@"willRotateToInterfaceOrientation");
+    // NSLog(@"willRotateToInterfaceOrientation");
 }
 
 -(void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
-    //    NSLog(@"didRotateFromInterfaceOrientation");
+    // NSLog(@"didRotateFromInterfaceOrientation");
 }
 
 -(void)didReceiveMemoryWarning
@@ -119,7 +119,7 @@
     return self.dataPuller.financialData.count;
 }
 
--(id)numberForPlot:(CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
+-(nullable id)numberForPlot:(nonnull CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
 {
     NSNumber *num = @0;
 
@@ -127,9 +127,9 @@
         num = @(index + 1);
     }
     else if ( fieldEnum == CPTScatterPlotFieldY ) {
-        CPTFinancialDataArray financialData = self.dataPuller.financialData;
+        CPTFinancialDataArray *financialData = self.dataPuller.financialData;
 
-        CPTDictionary fData = financialData[[financialData count] - index - 1];
+        CPTDictionary *fData = financialData[financialData.count - index - 1];
         num = fData[@"close"];
         NSAssert([num isMemberOfClass:[NSDecimalNumber class]], @"grrr");
     }
@@ -137,20 +137,20 @@
     return num;
 }
 
--(void)dataPullerFinancialDataDidChange:(APYahooDataPuller *)dp
+-(void)dataPullerFinancialDataDidChange:(nonnull APYahooDataPuller *)dp
 {
     [self reloadData];
 }
 
 #pragma mark accessors
 
--(void)setDataPuller:(APYahooDataPuller *)aDataPuller
+-(void)setDataPuller:(nonnull APYahooDataPuller *)aDataPuller
 {
-    //NSLog(@"in -setDataPuller:, old value of dataPuller: %@, changed to: %@", dataPuller, aDataPuller);
+    // NSLog(@"in -setDataPuller:, old value of dataPuller: %@, changed to: %@", dataPuller, aDataPuller);
 
     if ( dataPuller != aDataPuller ) {
-        dataPuller = aDataPuller;
-        [dataPuller setDelegate:self];
+        dataPuller          = aDataPuller;
+        dataPuller.delegate = self;
         [self reloadData];
     }
 }
@@ -162,7 +162,7 @@
     }
 }
 
--(NSUInteger)numberOfRecordsForPlot:(CPTPlot *)plot
+-(NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot
 {
     return [self numberOfRecords];
 }

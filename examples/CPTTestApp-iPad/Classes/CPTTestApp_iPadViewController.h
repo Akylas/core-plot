@@ -1,8 +1,8 @@
 //
-//  CPTTestApp_iPadViewController.h
-//  CPTTestApp-iPad
+// CPTTestApp_iPadViewController.h
+// CPTTestApp-iPad
 //
-//  Created by Brad Larson on 4/1/2010.
+// Created by Brad Larson on 4/1/2010.
 //
 
 #import "CorePlot-CocoaTouch.h"
@@ -10,8 +10,8 @@
 
 @interface CPTTestApp_iPadViewController : UIViewController<CPTBarPlotDataSource, CPTPieChartDataSource, CPTBarPlotDelegate>
 
-@property (nonatomic, readwrite, strong) CPTNumberArray dataForChart;
-@property (nonatomic, readwrite, strong) NSArray<NSDictionary *> *dataForPlot;
+@property (nonatomic, readwrite, strong, nonnull) CPTNumberArray *dataForChart;
+@property (nonatomic, readwrite, strong, nonnull) NSArray<NSDictionary *> *dataForPlot;
 
 // Plot construction methods
 -(void)constructScatterPlot;

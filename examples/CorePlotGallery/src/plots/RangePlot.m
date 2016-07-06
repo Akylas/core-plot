@@ -1,6 +1,6 @@
 //
-//  RangePlot.m
-//  CorePlotGallery
+// RangePlot.m
+// CorePlotGallery
 //
 
 #import "RangePlot.h"
@@ -9,10 +9,10 @@ static const NSTimeInterval oneDay = 24 * 60 * 60;
 
 @interface RangePlot()
 
-@property (nonatomic, readwrite, strong) CPTGraph *graph;
-@property (nonatomic, readwrite, strong) NSArray<NSDictionary *> *plotData;
-@property (nonatomic, readwrite, strong) CPTFill *areaFill;
-@property (nonatomic, readwrite, strong) CPTLineStyle *barLineStyle;
+@property (nonatomic, readwrite, strong, nullable) CPTGraph *graph;
+@property (nonatomic, readwrite, strong, nonnull) NSArray<NSDictionary *> *plotData;
+@property (nonatomic, readwrite, strong, nonnull) CPTFill *areaFill;
+@property (nonatomic, readwrite, strong, nonnull) CPTLineStyle *barLineStyle;
 
 @end
 
@@ -28,7 +28,7 @@ static const NSTimeInterval oneDay = 24 * 60 * 60;
     [super registerPlotItem:self];
 }
 
--(instancetype)init
+-(nonnull instancetype)init
 {
     if ( (self = [super init]) ) {
         graph    = nil;
@@ -68,25 +68,26 @@ static const NSTimeInterval oneDay = 24 * 60 * 60;
     }
 }
 
--(void)renderInGraphHostingView:(CPTGraphHostingView *)hostingView withTheme:(CPTTheme *)theme animated:(BOOL)animated
+-(void)renderInGraphHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme animated:(BOOL)animated
 {
     // If you make sure your dates are calculated at noon, you shouldn't have to
     // worry about daylight savings. If you use midnight, you will have to adjust
     // for daylight savings time.
     NSDate *refDate = [NSDate dateWithTimeIntervalSinceReferenceDate:oneDay / 2.0];
 
-#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+#if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
     CGRect bounds = hostingView.bounds;
 #else
     CGRect bounds = NSRectToCGRect(hostingView.bounds);
 #endif
 
     CPTXYGraph *newGraph = [[CPTXYGraph alloc] initWithFrame:bounds];
+    self.graph = newGraph;
+
     [self addGraph:newGraph toHostingView:hostingView];
     [self applyTheme:theme toGraph:newGraph withDefault:[CPTTheme themeNamed:kCPTDarkGradientTheme]];
 
     newGraph.plotAreaFrame.masksToBorder = NO;
-    self.graph                           = newGraph;
 
     // Instructions
     CPTMutableTextStyle *textStyle = [CPTMutableTextStyle textStyle];
@@ -94,7 +95,7 @@ static const NSTimeInterval oneDay = 24 * 60 * 60;
     textStyle.fontName = @"Helvetica";
     textStyle.fontSize = self.titleSize * CPTFloat(0.5);
 
-#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+#if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
     CPTTextLayer *textLayer = [[CPTTextLayer alloc] initWithText:@"Touch to Toggle Range Plot Style" style:textStyle];
 #else
     CPTTextLayer *textLayer = [[CPTTextLayer alloc] initWithText:@"Click to Toggle Range Plot Style" style:textStyle];
@@ -176,12 +177,12 @@ static const NSTimeInterval oneDay = 24 * 60 * 60;
 #pragma mark -
 #pragma mark Plot Data Source Methods
 
--(NSUInteger)numberOfRecordsForPlot:(CPTPlot *)plot
+-(NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot
 {
     return self.plotData.count;
 }
 
--(id)numberForPlot:(CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
+-(nullable id)numberForPlot:(nonnull CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
 {
     return self.plotData[index][@(fieldEnum)];
 }
@@ -189,7 +190,7 @@ static const NSTimeInterval oneDay = 24 * 60 * 60;
 #pragma mark -
 #pragma mark Plot Space Delegate Methods
 
--(BOOL)plotSpace:(CPTPlotSpace *)space shouldHandlePointingDeviceUpEvent:(id)event atPoint:(CGPoint)point
+-(BOOL)plotSpace:(nonnull CPTPlotSpace *)space shouldHandlePointingDeviceUpEvent:(nonnull CPTNativeEvent *)event atPoint:(CGPoint)point
 {
     CPTRangePlot *rangePlot = (CPTRangePlot *)[self.graph plotWithIdentifier:@"Range Plot"];
 
@@ -211,7 +212,7 @@ static const NSTimeInterval oneDay = 24 * 60 * 60;
 #pragma mark -
 #pragma mark Plot Delegate Methods
 
--(void)rangePlot:(CPTRangePlot *)plot rangeWasSelectedAtRecordIndex:(NSUInteger)index
+-(void)rangePlot:(nonnull CPTRangePlot *)plot rangeWasSelectedAtRecordIndex:(NSUInteger)index
 {
     NSLog(@"Range for '%@' was selected at index %d.", plot.identifier, (int)index);
 }

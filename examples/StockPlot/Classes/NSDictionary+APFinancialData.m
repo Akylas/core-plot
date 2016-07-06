@@ -2,20 +2,22 @@
 
 @interface NSDateFormatter(yahooCSVDateFormatter)
 
-+(NSDateFormatter *)yahooCSVDateFormatter;
++(nonnull NSDateFormatter *)yahooCSVDateFormatter;
 
 @end
 
+#pragma mark -
+
 @implementation NSDateFormatter(yahooCSVDateFormatter)
 
-+(NSDateFormatter *)yahooCSVDateFormatter
++(nonnull NSDateFormatter *)yahooCSVDateFormatter
 {
     static NSDateFormatter *df       = nil;
     static dispatch_once_t onceToken = 0;
 
     dispatch_once(&onceToken, ^{
         df = [[NSDateFormatter alloc] init];
-        [df setDateFormat:@"yyyy-MM-dd"];
+        df.dateFormat = @"yyyy-MM-dd";
     });
 
     return df;
@@ -23,13 +25,15 @@
 
 @end
 
+#pragma mark -
+
 @implementation NSDictionary(APFinancialData)
 
-+(CPTDictionary)dictionaryWithCSVLine:(NSString *)csvLine
++(nonnull CPTDictionary *)dictionaryWithCSVLine:(nonnull NSString *)csvLine
 {
-    CPTStringArray csvChunks = [csvLine componentsSeparatedByString:@","];
+    CPTStringArray *csvChunks = [csvLine componentsSeparatedByString:@","];
 
-    CPTMutableDictionary csvDict = [NSMutableDictionary dictionaryWithCapacity:7];
+    CPTMutableDictionary *csvDict = [NSMutableDictionary dictionaryWithCapacity:7];
 
     // Date,Open,High,Low,Close,Volume,Adj Close
     // 2009-06-08,143.82,144.23,139.43,143.85,33255400,143.85
@@ -49,7 +53,7 @@
     NSDecimalNumber *theAdjClose = [NSDecimalNumber decimalNumberWithString:csvChunks[6]];
     csvDict[@"adjClose"] = theAdjClose;
 
-    //non-mutable autoreleased dict
+    // non-mutable autoreleased dict
     return [NSDictionary dictionaryWithDictionary:csvDict];
 }
 

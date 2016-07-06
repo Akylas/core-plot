@@ -1,8 +1,8 @@
 //
-//  CPTTestApp_iPadViewController.m
-//  CPTTestApp-iPad
+// CPTTestApp_iPadViewController.m
+// CPTTestApp-iPad
 //
-//  Created by Brad Larson on 4/1/2010.
+// Created by Brad Larson on 4/1/2010.
 //
 
 #import "CPTTestApp_iPadViewController.h"
@@ -10,15 +10,15 @@
 
 @interface CPTTestApp_iPadViewController()
 
-@property (nonatomic, readwrite, strong) IBOutlet CPTGraphHostingView *scatterPlotView;
-@property (nonatomic, readwrite, strong) IBOutlet CPTGraphHostingView *barChartView;
-@property (nonatomic, readwrite, strong) IBOutlet CPTGraphHostingView *pieChartView;
+@property (nonatomic, readwrite, strong, nullable) IBOutlet CPTGraphHostingView *scatterPlotView;
+@property (nonatomic, readwrite, strong, nullable) IBOutlet CPTGraphHostingView *barChartView;
+@property (nonatomic, readwrite, strong, nullable) IBOutlet CPTGraphHostingView *pieChartView;
 
-@property (nonatomic, readwrite, strong) CPTXYGraph *graph;
-@property (nonatomic, readwrite, strong) CPTXYGraph *barChart;
-@property (nonatomic, readwrite, strong) CPTXYGraph *pieGraph;
+@property (nonatomic, readwrite, strong, nonnull) CPTXYGraph *graph;
+@property (nonatomic, readwrite, strong, nonnull) CPTXYGraph *barChart;
+@property (nonatomic, readwrite, strong, nonnull) CPTXYGraph *pieGraph;
 
-@property (nonatomic, readwrite, strong) CPTPieChart *piePlot;
+@property (nonatomic, readwrite, strong, nonnull) CPTPieChart *piePlot;
 @property (nonatomic, readwrite, assign) BOOL piePlotIsRotating;
 
 @end
@@ -76,30 +76,6 @@
     [self.piePlot performSelector:@selector(reloadData) withObject:nil afterDelay:0.4];
 }
 
--(void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
-{
-    if ( UIInterfaceOrientationIsLandscape(fromInterfaceOrientation) ) {
-        // Move the plots into place for portrait
-        self.scatterPlotView.frame = CGRectMake(20.0, 55.0, 728.0, 556.0);
-        self.barChartView.frame    = CGRectMake(20.0, 644.0, 340.0, 340.0);
-        self.pieChartView.frame    = CGRectMake(408.0, 644.0, 340.0, 340.0);
-    }
-    else {
-        // Move the plots into place for landscape
-        self.scatterPlotView.frame = CGRectMake(20.0, 51.0, 628.0, 677.0);
-        self.barChartView.frame    = CGRectMake(684.0, 51.0, 320.0, 320.0);
-        self.pieChartView.frame    = CGRectMake(684.0, 408.0, 320.0, 320.0);
-    }
-}
-
--(void)didReceiveMemoryWarning
-{
-    // Releases the view if it doesn't have a superview.
-    [super didReceiveMemoryWarning];
-
-    // Release any cached data, images, etc that aren't in use.
-}
-
 #pragma mark -
 #pragma mark Plot construction methods
 
@@ -130,9 +106,9 @@
     x.majorIntervalLength   = @0.5;
     x.orthogonalPosition    = @2.0;
     x.minorTicksPerInterval = 2;
-    CPTPlotRangeArray exclusionRanges = @[[CPTPlotRange plotRangeWithLocation:@1.99 length:@0.02],
-                                          [CPTPlotRange plotRangeWithLocation:@0.99 length:@0.02],
-                                          [CPTPlotRange plotRangeWithLocation:@2.99 length:@0.02]];
+    CPTPlotRangeArray *exclusionRanges = @[[CPTPlotRange plotRangeWithLocation:@1.99 length:@0.02],
+                                           [CPTPlotRange plotRangeWithLocation:@0.99 length:@0.02],
+                                           [CPTPlotRange plotRangeWithLocation:@2.99 length:@0.02]];
     x.labelExclusionRanges = exclusionRanges;
 
     CPTXYAxis *y = axisSet.yAxis;
@@ -254,10 +230,10 @@
     // Define some custom labels for the data elements
     x.labelRotation  = CPTFloat(M_PI_4);
     x.labelingPolicy = CPTAxisLabelingPolicyNone;
-    CPTNumberArray customTickLocations  = @[@1, @5, @10, @15];
-    CPTStringArray xAxisLabels          = @[@"Label A", @"Label B", @"Label C", @"Label D"];
-    NSUInteger labelLocation            = 0;
-    CPTMutableAxisLabelSet customLabels = [NSMutableSet setWithCapacity:[xAxisLabels count]];
+    CPTNumberArray *customTickLocations  = @[@1, @5, @10, @15];
+    CPTStringArray *xAxisLabels          = @[@"Label A", @"Label B", @"Label C", @"Label D"];
+    NSUInteger labelLocation             = 0;
+    CPTMutableAxisLabelSet *customLabels = [NSMutableSet setWithCapacity:xAxisLabels.count];
     for ( NSNumber *tickLocation in customTickLocations ) {
         CPTAxisLabel *newLabel = [[CPTAxisLabel alloc] initWithText:xAxisLabels[labelLocation++] textStyle:x.labelTextStyle];
         newLabel.tickLocation = tickLocation;
@@ -344,7 +320,7 @@
 #pragma mark -
 #pragma mark CPTBarPlot delegate method
 
--(void)barPlot:(CPTBarPlot *)plot barWasSelectedAtRecordIndex:(NSUInteger)index
+-(void)barPlot:(nonnull CPTBarPlot *)plot barWasSelectedAtRecordIndex:(NSUInteger)index
 {
     NSLog(@"barWasSelectedAtRecordIndex %lu", (unsigned long)index);
 }
@@ -352,7 +328,7 @@
 #pragma mark -
 #pragma mark Plot Data Source Methods
 
--(NSUInteger)numberOfRecordsForPlot:(CPTPlot *)plot
+-(NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot
 {
     if ( [plot isKindOfClass:[CPTPieChart class]] ) {
         return self.dataForChart.count;
@@ -365,12 +341,12 @@
     }
 }
 
--(id)numberForPlot:(CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
+-(nullable id)numberForPlot:(nonnull CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
 {
     NSNumber *num = nil;
 
     if ( [plot isKindOfClass:[CPTPieChart class]] ) {
-        if ( index >= [self.dataForChart count] ) {
+        if ( index >= self.dataForChart.count ) {
             return nil;
         }
 
@@ -410,9 +386,9 @@
             NSString *key = (fieldEnum == CPTScatterPlotFieldX ? @"x" : @"y");
             num = self.dataForPlot[index][key];
             // Green plot gets shifted above the blue
-            if ( [(NSString *)plot.identifier isEqualToString : @"Green Plot"] ) {
+            if ( [(NSString *) plot.identifier isEqualToString:@"Green Plot"] ) {
                 if ( fieldEnum == CPTScatterPlotFieldY ) {
-                    num = @([num doubleValue] + 1.0);
+                    num = @(num.doubleValue + 1.0);
                 }
             }
         }
@@ -424,7 +400,7 @@
     return num;
 }
 
--(CPTLayer *)dataLabelForPlot:(CPTPlot *)plot recordIndex:(NSUInteger)index
+-(nullable CPTLayer *)dataLabelForPlot:(nonnull CPTPlot *)plot recordIndex:(NSUInteger)index
 {
     if ( self.piePlotIsRotating ) {
         return nil;

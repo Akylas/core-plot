@@ -15,7 +15,7 @@
 {
     CPTTheme *theme = [[CPTTheme alloc] init];
 
-    [theme setGraphClass:[CPTXYGraph class]];
+    theme.graphClass = [CPTXYGraph class];
     XCTAssertEqual([CPTXYGraph class], theme.graphClass, @"graphClass should be CPTXYGraph");
 }
 
@@ -23,7 +23,7 @@
 {
     CPTTheme *theme = [[CPTTheme alloc] init];
 
-    [theme setGraphClass:[CPTDerivedXYGraph class]];
+    theme.graphClass = [CPTDerivedXYGraph class];
     XCTAssertEqual([CPTDerivedXYGraph class], theme.graphClass, @"graphClass should be CPTDerivedXYGraph");
 }
 
@@ -52,6 +52,8 @@
     CPTTheme *theme = [CPTTheme themeNamed:kCPTDarkGradientTheme];
 
     XCTAssertTrue([theme isKindOfClass:[_CPTDarkGradientTheme class]], @"Should be _CPTDarkGradientTheme");
+
+    [self archiveRoundTrip:theme toClass:[CPTTheme class]];
 }
 
 -(void)testThemeNamedPlainBlackShouldReturnCPTPlainBlackTheme
@@ -59,6 +61,8 @@
     CPTTheme *theme = [CPTTheme themeNamed:kCPTPlainBlackTheme];
 
     XCTAssertTrue([theme isKindOfClass:[_CPTPlainBlackTheme class]], @"Should be _CPTPlainBlackTheme");
+
+    [self archiveRoundTrip:theme toClass:[CPTTheme class]];
 }
 
 -(void)testThemeNamedPlainWhiteShouldReturnCPTPlainWhiteTheme
@@ -66,6 +70,8 @@
     CPTTheme *theme = [CPTTheme themeNamed:kCPTPlainWhiteTheme];
 
     XCTAssertTrue([theme isKindOfClass:[_CPTPlainWhiteTheme class]], @"Should be _CPTPlainWhiteTheme");
+
+    [self archiveRoundTrip:theme toClass:[CPTTheme class]];
 }
 
 -(void)testThemeNamedStocksShouldReturnCPTStocksTheme
@@ -73,6 +79,8 @@
     CPTTheme *theme = [CPTTheme themeNamed:kCPTStocksTheme];
 
     XCTAssertTrue([theme isKindOfClass:[_CPTStocksTheme class]], @"Should be _CPTStocksTheme");
+
+    [self archiveRoundTrip:theme toClass:[CPTTheme class]];
 }
 
 -(void)testThemeNamedSlateShouldReturnCPTSlateTheme
@@ -80,6 +88,8 @@
     CPTTheme *theme = [CPTTheme themeNamed:kCPTSlateTheme];
 
     XCTAssertTrue([theme isKindOfClass:[_CPTSlateTheme class]], @"Should be _CPTSlateTheme");
+
+    [self archiveRoundTrip:theme toClass:[CPTTheme class]];
 }
 
 @end

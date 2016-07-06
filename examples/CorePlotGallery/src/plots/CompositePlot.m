@@ -1,6 +1,6 @@
 //
-//  CompositePlot.m
-//  CorePlotGallery
+// CompositePlot.m
+// CorePlotGallery
 //
 
 #import "CompositePlot.h"
@@ -9,13 +9,13 @@
 
 @property (nonatomic, readwrite, assign) NSInteger selectedIndex;
 
-@property (nonatomic, readwrite, strong) CPTGraphHostingView *scatterPlotView;
-@property (nonatomic, readwrite, strong) CPTGraphHostingView *barChartView;
-@property (nonatomic, readwrite, strong) CPTGraphHostingView *pieChartView;
+@property (nonatomic, readwrite, strong, nullable) CPTGraphHostingView *scatterPlotView;
+@property (nonatomic, readwrite, strong, nullable) CPTGraphHostingView *barChartView;
+@property (nonatomic, readwrite, strong, nullable) CPTGraphHostingView *pieChartView;
 
-@property (nonatomic, readwrite, strong) CPTXYGraph *scatterPlot;
-@property (nonatomic, readwrite, strong) CPTXYGraph *barChart;
-@property (nonatomic, readwrite, strong) CPTXYGraph *pieChart;
+@property (nonatomic, readwrite, strong, nullable) CPTXYGraph *scatterPlot;
+@property (nonatomic, readwrite, strong, nullable) CPTXYGraph *barChart;
+@property (nonatomic, readwrite, strong, nullable) CPTXYGraph *pieChart;
 
 @end
 
@@ -38,7 +38,7 @@
     [super registerPlotItem:self];
 }
 
--(instancetype)init
+-(nonnull instancetype)init
 {
     if ( (self = [super init]) ) {
         selectedIndex = NSNotFound;
@@ -53,7 +53,7 @@
 #pragma mark -
 #pragma mark Plot construction methods
 
-#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+#if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
 #else
 
 -(void)setFrameSize:(NSSize)newSize
@@ -79,7 +79,7 @@
 }
 #endif
 
--(void)renderInView:(PlotGalleryNativeView *)hostingView withTheme:(CPTTheme *)theme animated:(BOOL)animated
+-(void)renderInView:(nonnull PlotGalleryNativeView *)hostingView withTheme:(nullable CPTTheme *)theme animated:(BOOL)animated
 {
     [self killGraph];
 
@@ -87,7 +87,7 @@
     CPTGraphHostingView *barView     = [[CPTGraphHostingView alloc] init];
     CPTGraphHostingView *pieView     = [[CPTGraphHostingView alloc] init];
 
-#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+#if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
     for ( UIView *view in @[scatterView, barView, pieView] ) {
         view.translatesAutoresizingMaskIntoConstraints = NO;
         [hostingView addSubview:view];
@@ -168,7 +168,7 @@
                                                              constant:0.0]];
 
 #else
-    NSRect viewRect = [hostingView bounds];
+    NSRect viewRect = hostingView.bounds;
 
     scatterView.frame = NSMakeRect( 0.0,
                                     0.0,
@@ -187,7 +187,7 @@
 
     for ( NSView *view in @[scatterView, barView, pieView] ) {
         [view setAutoresizesSubviews:YES];
-        [view setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+        view.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 
         [hostingView addSubview:view];
     }
@@ -221,19 +221,20 @@
     [super killGraph];
 }
 
--(void)renderScatterPlotInHostingView:(CPTGraphHostingView *)hostingView withTheme:(CPTTheme *)theme
+-(void)renderScatterPlotInHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme
 {
     // Create graph from theme
-#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
     CGRect bounds = self.scatterPlotView.bounds;
 #else
     CGRect bounds = NSRectToCGRect(self.scatterPlotView.bounds);
 #endif
 
-    self.scatterPlot = [[CPTXYGraph alloc] initWithFrame:bounds];
-    [self addGraph:self.scatterPlot toHostingView:hostingView];
+    CPTXYGraph *newGraph = [[CPTXYGraph alloc] initWithFrame:bounds];
+    self.scatterPlot = newGraph;
 
-    [self applyTheme:theme toGraph:self.scatterPlot withDefault:[CPTTheme themeNamed:kCPTDarkGradientTheme]];
+    [self addGraph:newGraph toHostingView:hostingView];
+    [self applyTheme:theme toGraph:newGraph withDefault:[CPTTheme themeNamed:kCPTDarkGradientTheme]];
 
     self.scatterPlot.plotAreaFrame.plotArea.delegate = self;
 
@@ -249,9 +250,9 @@
     x.majorIntervalLength   = @0.5;
     x.orthogonalPosition    = @2.0;
     x.minorTicksPerInterval = 2;
-    CPTPlotRangeArray exclusionRanges = @[[CPTPlotRange plotRangeWithLocation:@1.99 length:@0.02],
-                                          [CPTPlotRange plotRangeWithLocation:@0.99 length:@0.02],
-                                          [CPTPlotRange plotRangeWithLocation:@2.99 length:@0.02]];
+    CPTPlotRangeArray *exclusionRanges = @[[CPTPlotRange plotRangeWithLocation:@1.99 length:@0.02],
+                                           [CPTPlotRange plotRangeWithLocation:@0.99 length:@0.02],
+                                           [CPTPlotRange plotRangeWithLocation:@2.99 length:@0.02]];
     x.labelExclusionRanges = exclusionRanges;
 
     CPTXYAxis *y = axisSet.yAxis;
@@ -328,17 +329,19 @@
     self.dataForPlot = contentArray;
 }
 
--(void)renderBarPlotInHostingView:(CPTGraphHostingView *)hostingView withTheme:(CPTTheme *)theme
+-(void)renderBarPlotInHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme
 {
-#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+#if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
     CGRect bounds = hostingView.bounds;
 #else
     CGRect bounds = NSRectToCGRect(hostingView.bounds);
 #endif
 
-    self.barChart = [[CPTXYGraph alloc] initWithFrame:bounds];
-    [self addGraph:self.barChart toHostingView:hostingView];
-    [self applyTheme:theme toGraph:self.barChart withDefault:[CPTTheme themeNamed:kCPTDarkGradientTheme]];
+    CPTXYGraph *newGraph = [[CPTXYGraph alloc] initWithFrame:bounds];
+    self.barChart = newGraph;
+
+    [self addGraph:newGraph toHostingView:hostingView];
+    [self applyTheme:theme toGraph:newGraph withDefault:[CPTTheme themeNamed:kCPTDarkGradientTheme]];
 
     self.barChart.plotAreaFrame.masksToBorder = NO;
 
@@ -358,10 +361,10 @@
     x.labelOffset    = 2.0;
     x.labelRotation  = CPTFloat(M_PI_4);
     x.labelingPolicy = CPTAxisLabelingPolicyNone;
-    CPTNumberArray customTickLocations  = @[@1, @5, @10, @15];
-    CPTStringArray xAxisLabels          = @[@"Label A", @"Label B", @"Label C", @"Label D"];
-    NSUInteger labelLocation            = 0;
-    CPTMutableAxisLabelSet customLabels = [NSMutableSet setWithCapacity:[xAxisLabels count]];
+    CPTNumberArray *customTickLocations  = @[@1, @5, @10, @15];
+    CPTStringArray *xAxisLabels          = @[@"Label A", @"Label B", @"Label C", @"Label D"];
+    NSUInteger labelLocation             = 0;
+    CPTMutableAxisLabelSet *customLabels = [NSMutableSet setWithCapacity:xAxisLabels.count];
     for ( NSNumber *tickLocation in customTickLocations ) {
         CPTAxisLabel *newLabel = [[CPTAxisLabel alloc] initWithText:xAxisLabels[labelLocation++] textStyle:x.labelTextStyle];
         newLabel.tickLocation = tickLocation;
@@ -396,9 +399,9 @@
     [self.barChart addPlot:barPlot toPlotSpace:plotSpace];
 }
 
--(void)renderPieChartInHostingView:(CPTGraphHostingView *)hostingView withTheme:(CPTTheme *)theme
+-(void)renderPieChartInHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme
 {
-#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+#if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
     [hostingView layoutIfNeeded];
 
     CGRect bounds = hostingView.bounds;
@@ -406,9 +409,11 @@
     CGRect bounds = NSRectToCGRect(hostingView.bounds);
 #endif
 
-    self.pieChart = [[CPTXYGraph alloc] initWithFrame:bounds];
-    [self addGraph:self.pieChart toHostingView:hostingView];
-    [self applyTheme:theme toGraph:self.pieChart withDefault:[CPTTheme themeNamed:kCPTDarkGradientTheme]];
+    CPTXYGraph *newGraph = [[CPTXYGraph alloc] initWithFrame:bounds];
+    self.pieChart = newGraph;
+
+    [self addGraph:newGraph toHostingView:hostingView];
+    [self applyTheme:theme toGraph:newGraph withDefault:[CPTTheme themeNamed:kCPTDarkGradientTheme]];
 
     self.pieChart.plotAreaFrame.masksToBorder = NO;
 
@@ -432,7 +437,7 @@
 #pragma mark -
 #pragma mark CPTBarPlot delegate
 
--(void)barPlot:(CPTBarPlot *)plot barWasSelectedAtRecordIndex:(NSUInteger)index
+-(void)barPlot:(nonnull CPTBarPlot *)plot barWasSelectedAtRecordIndex:(NSUInteger)index
 {
     NSLog(@"barWasSelectedAtRecordIndex %d", (int)index);
 }
@@ -440,9 +445,9 @@
 #pragma mark -
 #pragma mark CPTScatterPlot delegate
 
--(void)scatterPlot:(CPTScatterPlot *)plot plotSymbolWasSelectedAtRecordIndex:(NSUInteger)index
+-(void)scatterPlot:(nonnull CPTScatterPlot *)plot plotSymbolWasSelectedAtRecordIndex:(NSUInteger)index
 {
-    if ( [(NSString *)plot.identifier isEqualToString : @"Blue Plot"] ) {
+    if ( [(NSString *) plot.identifier isEqualToString:@"Blue Plot"] ) {
         self.selectedIndex = (NSInteger)index;
     }
 }
@@ -450,7 +455,7 @@
 #pragma mark -
 #pragma mark Plot area delegate
 
--(void)plotAreaWasSelected:(CPTPlotArea *)plotArea
+-(void)plotAreaWasSelected:(nonnull CPTPlotArea *)plotArea
 {
     CPTGraph *theGraph = plotArea.graph;
 
@@ -462,10 +467,10 @@
 #pragma mark -
 #pragma mark Plot Data Source
 
--(NSUInteger)numberOfRecordsForPlot:(CPTPlot *)plot
+-(NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot
 {
     if ( [plot isKindOfClass:[CPTPieChart class]] ) {
-        return [self.dataForChart count];
+        return self.dataForChart.count;
     }
     else if ( [plot isKindOfClass:[CPTBarPlot class]] ) {
         return 16;
@@ -475,12 +480,12 @@
     }
 }
 
--(id)numberForPlot:(CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
+-(nullable id)numberForPlot:(nonnull CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
 {
     NSNumber *num = nil;
 
     if ( [plot isKindOfClass:[CPTPieChart class]] ) {
-        if ( index >= [self.dataForChart count] ) {
+        if ( index >= self.dataForChart.count ) {
             return nil;
         }
 
@@ -510,9 +515,9 @@
         num = self.dataForPlot[index][key];
 
         // Green plot gets shifted above the blue
-        if ( [(NSString *)plot.identifier isEqualToString : @"Green Plot"] ) {
+        if ( [(NSString *) plot.identifier isEqualToString:@"Green Plot"] ) {
             if ( fieldEnum == CPTScatterPlotFieldY ) {
-                num = @([num doubleValue] + 1.0);
+                num = @(num.doubleValue + 1.0);
             }
         }
     }
@@ -520,7 +525,7 @@
     return num;
 }
 
--(CPTLayer *)dataLabelForPlot:(CPTPlot *)plot recordIndex:(NSUInteger)index
+-(nullable CPTLayer *)dataLabelForPlot:(nonnull CPTPlot *)plot recordIndex:(NSUInteger)index
 {
     CPTTextLayer *newLayer = nil;
 
@@ -563,14 +568,14 @@
     return newLayer;
 }
 
--(CPTPlotSymbol *)symbolForScatterPlot:(CPTScatterPlot *)plot recordIndex:(NSUInteger)index
+-(nullable CPTPlotSymbol *)symbolForScatterPlot:(nonnull CPTScatterPlot *)plot recordIndex:(NSUInteger)index
 {
     static CPTPlotSymbol *redDot     = nil;
     static dispatch_once_t onceToken = 0;
 
     CPTPlotSymbol *symbol = nil; // Use the default symbol
 
-    if ( [(NSString *)plot.identifier isEqualToString : @"Blue Plot"] && ( (NSInteger)index == self.selectedIndex ) ) {
+    if ( [(NSString *) plot.identifier isEqualToString:@"Blue Plot"] && ( (NSInteger)index == self.selectedIndex ) ) {
         dispatch_once(&onceToken, ^{
             redDot = [[CPTPlotSymbol alloc] init];
             redDot.symbolType = CPTPlotSymbolTypeEllipse;

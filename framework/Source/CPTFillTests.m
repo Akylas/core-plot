@@ -10,7 +10,7 @@
 
 @interface _CPTFillColor()
 
-@property (nonatomic, readwrite, copy) CPTColor *fillColor;
+@property (nonatomic, readwrite, copy, nonnull) CPTColor *fillColor;
 
 @end
 
@@ -18,7 +18,7 @@
 
 @interface _CPTFillGradient()
 
-@property (nonatomic, readwrite, copy) CPTGradient *fillGradient;
+@property (nonatomic, readwrite, copy, nonnull) CPTGradient *fillGradient;
 
 @end
 
@@ -26,7 +26,7 @@
 
 @interface _CPTFillImage()
 
-@property (nonatomic, readwrite, copy) CPTImage *fillImage;
+@property (nonatomic, readwrite, copy, nonnull) CPTImage *fillImage;
 
 @end
 
@@ -41,7 +41,7 @@
 {
     _CPTFillColor *fill = (_CPTFillColor *)[CPTFill fillWithColor:[CPTColor redColor]];
 
-    _CPTFillColor *newFill = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:fill]];
+    _CPTFillColor *newFill = [self archiveRoundTrip:fill toClass:[CPTFill class]];
 
     XCTAssertEqualObjects(fill.fillColor, newFill.fillColor, @"Fill with color not equal");
 }
@@ -50,7 +50,7 @@
 {
     _CPTFillGradient *fill = (_CPTFillGradient *)[CPTFill fillWithGradient:[CPTGradient rainbowGradient]];
 
-    _CPTFillGradient *newFill = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:fill]];
+    _CPTFillGradient *newFill = [self archiveRoundTrip:fill toClass:[CPTFill class]];
 
     XCTAssertEqualObjects(fill.fillGradient, newFill.fillGradient, @"Fill with gradient not equal");
 }
@@ -62,7 +62,7 @@
 
     size_t bytesPerRow = (4 * width + 15) & ~15ul;
 
-#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+#if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
 #else
     CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
@@ -80,7 +80,7 @@
 
     _CPTFillImage *fill = (_CPTFillImage *)[CPTFill fillWithImage:image];
 
-    _CPTFillImage *newFill = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:fill]];
+    _CPTFillImage *newFill = [self archiveRoundTrip:fill toClass:[CPTFill class]];
 
     XCTAssertEqualObjects(fill.fillImage, newFill.fillImage, @"Fill with image not equal");
 }

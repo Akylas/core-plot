@@ -7,7 +7,7 @@
 
 @interface CPTXYPlotSpace(testingAdditions)
 
--(CPTPlotRange *)constrainRange:(CPTPlotRange *)existingRange toGlobalRange:(CPTPlotRange *)globalRange;
+-(nonnull CPTPlotRange *)constrainRange:(nonnull CPTPlotRange *)existingRange toGlobalRange:(nullable CPTPlotRange *)globalRange;
 
 @end
 
@@ -49,7 +49,7 @@
     plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:@0.0
                                                     length:@10.0];
 
-    CPTNumberArray plotPoint = @[@5.0, @5.0];
+    CPTNumberArray *plotPoint = @[@5.0, @5.0];
 
     CGPoint viewPoint = [plotSpace plotAreaViewPointForPlotPoint:plotPoint];
 
@@ -146,7 +146,7 @@
     plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:@1.0
                                                     length:@9.0];
 
-    CPTNumberArray plotPoint = @[@( sqrt(10.0) ), @( sqrt(10.0) )];
+    CPTNumberArray *plotPoint = @[@( sqrt(10.0) ), @( sqrt(10.0) )];
 
     CGPoint viewPoint = [plotSpace plotAreaViewPointForPlotPoint:plotPoint];
 
@@ -310,8 +310,8 @@
     plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:@0.0
                                                     length:@10.0];
 
-    CGPoint viewPoint        = CPTPointMake(50.0, 25.0);
-    CPTNumberArray plotPoint = [plotSpace plotPointForPlotAreaViewPoint:viewPoint];
+    CGPoint viewPoint         = CPTPointMake(50.0, 25.0);
+    CPTNumberArray *plotPoint = [plotSpace plotPointForPlotAreaViewPoint:viewPoint];
     NSString *errMessage;
 
     errMessage = [NSString stringWithFormat:@"plotPoint[CPTCoordinateX] was %@", plotPoint[CPTCoordinateX]];
@@ -383,8 +383,8 @@
     plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:@1.0
                                                     length:@9.0];
 
-    CGPoint viewPoint        = CPTPointMake(50.0, 25.0);
-    CPTNumberArray plotPoint = [plotSpace plotPointForPlotAreaViewPoint:viewPoint];
+    CGPoint viewPoint         = CPTPointMake(50.0, 25.0);
+    CPTNumberArray *plotPoint = [plotSpace plotPointForPlotAreaViewPoint:viewPoint];
     NSString *errMessage;
 
     [plotSpace plotPointForPlotAreaViewPoint:viewPoint];
@@ -526,7 +526,6 @@
     CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)self.graph.defaultPlotSpace;
 
     XCTAssertEqualObjects([plotSpace constrainRange:plotSpace.xRange toGlobalRange:nil], plotSpace.xRange, @"Constrain to nil global range should return original range.");
-    XCTAssertNil([plotSpace constrainRange:nil toGlobalRange:plotSpace.xRange], @"Constrain nil range should return nil.");
 }
 
 -(void)testConstrainRanges1
@@ -664,7 +663,7 @@
     plotSpace.globalYRange = [CPTPlotRange plotRangeWithLocation:@10.0
                                                           length:@(-10.0)];
 
-    CPTXYPlotSpace *newPlotSpace = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:plotSpace]];
+    CPTXYPlotSpace *newPlotSpace = [self archiveRoundTrip:plotSpace];
 
     NSString *errMessage = [NSString stringWithFormat:@"xRange was %@, expected %@", plotSpace.xRange, newPlotSpace.xRange];
     XCTAssertTrue([plotSpace.xRange isEqualToRange:newPlotSpace.xRange], @"%@", errMessage);
