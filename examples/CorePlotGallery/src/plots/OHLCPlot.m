@@ -28,7 +28,7 @@ static const NSTimeInterval oneDay = 24 * 60 * 60;
 {
     if ( (self = [super init]) ) {
         graph    = nil;
-        plotData = nil;
+        plotData = @[];
 
         self.title   = @"OHLC Plot";
         self.section = kFinancialPlots;
@@ -39,7 +39,7 @@ static const NSTimeInterval oneDay = 24 * 60 * 60;
 
 -(void)generateData
 {
-    if ( !self.plotData ) {
+    if ( self.plotData.count == 0 ) {
         NSMutableArray<NSDictionary *> *newData = [NSMutableArray array];
         for ( NSUInteger i = 0; i < 8; i++ ) {
             NSTimeInterval x = oneDay * i;
