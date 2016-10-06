@@ -782,7 +782,7 @@ static const CGFloat colorLookupTable[10][3] =
             angle   += pieSliceValue * pieRange;
             break;
     }
-    return fmod(angle, 2.0 * M_PI);
+    return (CGFloat)fmod(angle, 2.0 * M_PI);
 }
 
 -(void)addSliceToPath:(nonnull CGMutablePathRef)slicePath centerPoint:(CGPoint)center startingAngle:(CGFloat)startingAngle finishingAngle:(CGFloat)finishingAngle
@@ -1160,7 +1160,7 @@ static const CGFloat colorLookupTable[10][3] =
         return NO;
     }
 
-    id<CPTPieChartDelegate> theDelegate = self.delegate;
+    id<CPTPieChartDelegate> theDelegate = ( id<CPTPlotAreaDelegate>)self.delegate;
     if ( [theDelegate respondsToSelector:@selector(pieChart:sliceTouchDownAtRecordIndex:)] ||
          [theDelegate respondsToSelector:@selector(pieChart:sliceTouchDownAtRecordIndex:withEvent:)] ||
          [theDelegate respondsToSelector:@selector(pieChart:sliceWasSelectedAtRecordIndex:)] ||
@@ -1229,7 +1229,7 @@ static const CGFloat colorLookupTable[10][3] =
         return NO;
     }
 
-    id<CPTPieChartDelegate> theDelegate = self.delegate;
+    id<CPTPieChartDelegate> theDelegate = ( id<CPTPlotAreaDelegate>)self.delegate;
     if ( [theDelegate respondsToSelector:@selector(pieChart:sliceTouchUpAtRecordIndex:)] ||
          [theDelegate respondsToSelector:@selector(pieChart:sliceTouchUpAtRecordIndex:withEvent:)] ||
          [theDelegate respondsToSelector:@selector(pieChart:sliceWasSelectedAtRecordIndex:)] ||

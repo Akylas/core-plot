@@ -164,6 +164,17 @@ typedef NS_ENUM (NSInteger, CPTScatterPlotHistogramOption) {
  **/
 -(void)scatterPlot:(nonnull CPTScatterPlot *)plot plotSymbolTouchUpAtRecordIndex:(NSUInteger)idx withEvent:(nonnull CPTNativeEvent *)event;
 
+/** @brief @optional Informs the delegate that a data point
+ *  @if MacOnly was released. @endif
+ *  @if iOSOnly touch ended. @endif
+ *  @param plot The scatter plot.
+ *  @param idx The index of the
+ *  @if MacOnly clicked data point. @endif
+ *  @if iOSOnly touched data point. @endif
+ *  @param event The event that triggered the selection.
+ **/
+-(void)scatterPlot:(nonnull CPTScatterPlot *)plot plotWasClickedAtRecordIndex:(NSUInteger)idx withEvent:(nonnull CPTNativeEvent *)event;
+
 /// @}
 
 /// @name Data Line Selection

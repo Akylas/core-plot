@@ -2109,6 +2109,11 @@ if (self.fillSpacePath) {
                         [theDelegate scatterPlot:self plotSymbolWasSelectedAtRecordIndex:idx withEvent:event];
                     }
                 }
+            } else {
+                if ( [theDelegate respondsToSelector:@selector(scatterPlot:plotWasClickedAtRecordIndex:withEvent:)] ) {
+                    symbolSelectHandled = YES;
+                    [theDelegate scatterPlot:self plotWasClickedAtRecordIndex:idx withEvent:event];
+                }
             }
         }
     }
